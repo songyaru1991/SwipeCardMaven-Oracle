@@ -49,6 +49,7 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.apache.log4j.Logger;
 
 import com.swipecard.util.FormatDateUtil;
 import com.swipecard.util.SwipeCardJButton;
@@ -61,6 +62,7 @@ import com.swipecard.model.SwipeCardTimeInfos;
 
 public class SwipeCard extends JFrame {
 	private final static String CurrentVersion="V20171018";
+	private static Logger logger = Logger.getLogger(SwipeCard.class);
 	private Vector<Vector<Object>> rowData = new Vector<Vector<Object>>();
 	private JTable table;
 	private String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";	
@@ -95,6 +97,7 @@ public class SwipeCard extends JFrame {
 			 */
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 		} catch (Exception e) {
+			logger.error("Error opening session:"+e);
 			SwipeCardNoDB d = new SwipeCardNoDB(null);
 			e.printStackTrace();
 		}
@@ -362,6 +365,7 @@ public class SwipeCard extends JFrame {
 							}
 
 						} catch (Exception e1) {
+							logger.error(e1);
 							System.out.println("Error opening session");
 							dispose();
 							SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
@@ -505,6 +509,7 @@ public class SwipeCard extends JFrame {
 					// System.out.println("State!"+ mytable.getColumnClass(0));
 				} catch (Exception e1) {
 					System.out.println("Error opening session");
+					logger.error("綁定指示單號失敗,原因:"+e1);
 					dispose();
 					SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
 					throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e1, e1);
@@ -738,6 +743,7 @@ public class SwipeCard extends JFrame {
 							}
 						} catch (Exception e1) {
 							System.out.println("Error opening session");
+							logger.error("刷卡異常,原因:"+e1);
 							dispose();
 							SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
 							throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e1, e1);
@@ -1200,7 +1206,7 @@ public class SwipeCard extends JFrame {
 			final Object[] s = a;
 			return a;
 		} catch (Exception e1) {
-			System.out.println("Error opening session");
+			logger.error("取得指示單號異常:"+e1);
 			dispose();
 			SwipeCardNoDB d = new SwipeCardNoDB(null);
 			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e1, e1);
@@ -1231,6 +1237,7 @@ public class SwipeCard extends JFrame {
 			session.commit();
 		}
 		catch(Exception ex) {
+			logger.error("寫入原始刷卡記錄異常"+ex);
 			dispose();
 			SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
 			ex.printStackTrace();
@@ -1399,6 +1406,7 @@ public class SwipeCard extends JFrame {
 			else
 				isContinuesWorkForAWeek = true;
 		} catch (Exception ex) {
+			logger.error("七休一異常：" + ex);
 			dispose();
 			SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
 			ex.printStackTrace();
