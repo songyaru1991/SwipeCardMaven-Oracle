@@ -45,13 +45,9 @@ import com.swipecard.util.FormatDateUtil;
 import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.PingMySqlUtil;
 import com.swipecard.util.SwipeCardJButton;
-import com.swipecard.swipeRecordLog.SwipeRecordLogToDB;
 
 public class SwipeCardNoDB extends JFrame {
 	private final static String CurrentVersion="V20171018";
-	private static final Timer nowTime = new Timer();
-	private Vector<Vector<Object>> rowData = new Vector<Vector<Object>>();
-	private int count = 0;
 	private String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	private String time;
 	private int ONE_SECOND = 1000;
@@ -74,11 +70,13 @@ public class SwipeCardNoDB extends JFrame {
 	 */
 
 	protected class JLabelTimerTask extends TimerTask {
-		SimpleDateFormat dateFormatter = new SimpleDateFormat(DEFAULT_TIME_FORMAT);
 
 		@Override
 		public void run() {
-			time = dateFormatter.format(Calendar.getInstance().getTime());
+			Date date = new Date();
+			SimpleDateFormat dateFormatter = new SimpleDateFormat(DEFAULT_TIME_FORMAT);
+			//time = dateFormatter.format(Calendar.getInstance().getTime());
+			time = dateFormatter.format(date);
 			curTimeLable.setText(time);
 		}
 	}
@@ -164,7 +162,7 @@ public class SwipeCardNoDB extends JFrame {
 		tmr.scheduleAtFixedRate(new JLabelTimerTask(), new Date(), ONE_SECOND);
 
 	     final Timer checkDBLinktmr = new Timer();
-		checkDBLinktmr.scheduleAtFixedRate(new CheckDBLinkTimerTask(),15 * 60 * 1000, 15 * 60 * 1000);
+		checkDBLinktmr.scheduleAtFixedRate(new CheckDBLinkTimerTask(),5 * 60 * 1000, 5 * 60 * 1000);
 		
 		curTimeLable = new JLabel();
 		curTimeLable.setFont(new Font("微软雅黑", Font.BOLD, 35));

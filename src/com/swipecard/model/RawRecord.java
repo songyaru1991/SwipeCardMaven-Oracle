@@ -6,6 +6,7 @@ public class RawRecord {
 	private String Id;
 	private String CardID;
 	private Date SwipeCardTime;
+	private String Record_Status;
 	public String getId() {
 		return Id;
 	}
@@ -23,5 +24,11 @@ public class RawRecord {
 	}
 	public void setSwipeCardTime(Date swipeCardTime2) {
 		SwipeCardTime = swipeCardTime2;
+	}
+	public String getRecord_Status() {
+		return Record_Status;
+	}
+	public void setRecord_Status(String record_Status) {
+		Record_Status = record_Status;
 	}
 }

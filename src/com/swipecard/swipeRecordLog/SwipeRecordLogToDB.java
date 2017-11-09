@@ -22,12 +22,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.swipecard.util.FormatDateUtil;
 import com.swipecard.util.JsonFileUtil;
-import com.swipecard.model.EmpShiftInfos;
 import com.swipecard.model.Employee;
 import com.swipecard.model.RawRecord;
-import com.swipecard.model.User;
 import com.swipecard.SwipeCardNoDB;
 
 public class SwipeRecordLogToDB {

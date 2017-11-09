@@ -5,7 +5,7 @@ import java.util.Date;
 public class SwipeCardTimeInfos {
 	
 	private String EMP_ID;
-	private String SwipeDate;
+	private String SWIPE_DATE;
 	private Date SwipeCardTime;
 	private Date SwipeCardTime2;
 	private String CheckState;
@@ -14,7 +14,7 @@ public class SwipeCardTimeInfos {
 	private String PRIMARY_ITEM_NO;
 	private String RC_NO;
 	private String Shift;
-	private String ClassNo;
+	private String CLASS_NO;
 	
 	public Date getSwipeCardTime() {
 		return SwipeCardTime;
@@ -55,24 +55,14 @@ public class SwipeCardTimeInfos {
 	public void setShift(String shift) {
 		Shift = shift;
 	}
-	public String getSwipeDate() {
-		return SwipeDate;
-	}
-	public void setSwipeDate(String swipeDate) {
-		SwipeDate = swipeDate;
-	}
+
 	public String getEMP_ID() {
 		return EMP_ID;
 	}
 	public void setEMP_ID(String eMP_ID) {
 		EMP_ID = eMP_ID;
 	}
-	public String getClassNo() {
-		return ClassNo;
-	}
-	public void setClassNo(String classNo) {
-		ClassNo = classNo;
-	}
+
 	public String getPRIMARY_ITEM_NO() {
 		return PRIMARY_ITEM_NO;
 	}
@@ -84,6 +74,18 @@ public class SwipeCardTimeInfos {
 	}
 	public void setRC_NO(String rC_NO) {
 		RC_NO = rC_NO;
+	}
+	public String getCLASS_NO() {
+		return CLASS_NO;
+	}
+	public void setCLASS_NO(String cLASS_NO) {
+		CLASS_NO = cLASS_NO;
+	}
+	public String getSWIPE_DATE() {
+		return SWIPE_DATE;
+	}
+	public void setSWIPE_DATE(String sWIPE_DATE) {
+		SWIPE_DATE = sWIPE_DATE;
 	}
 	
 

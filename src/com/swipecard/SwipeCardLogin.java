@@ -37,7 +37,8 @@ import org.json.JSONObject;
 
 import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.SwipeCardJButton;
-import com.swipecard.model.User;
+import com.swipecard.model.Employee;
+import com.swipecard.model.LineNO;
 
 public class SwipeCardLogin extends JFrame {
 	private final static String CurrentVersion = "V20171018";
@@ -153,18 +154,18 @@ public class SwipeCardLogin extends JFrame {
 	JsonFileUtil jsonFileUtil = new JsonFileUtil();
 
 	public Object[] getWorkshopNo() {// TODO
-		List<User> user;
+		List<LineNO> workshopNoInfo;
 		Object[] a = null;
 		try {
 			SqlSession session = sqlSessionFactory.openSession();
 			JSONArray workshopNoArray = new JSONArray();
-			user = session.selectList("selectWorkshopNo");
-			int con = user.size();
+			workshopNoInfo = session.selectList("selectWorkshopNo");
+			int con = workshopNoInfo.size();
 			if (con > 0) {
 				a = new Object[con + 1];
 				a[0] = "--請選擇車間--";
 				for (int i = 1; i < con + 1; i++) {
-					a[i] = user.get(i - 1 ).getWorkshopNo();
+					a[i] = workshopNoInfo.get(i - 1 ).getWorkShopNo();
 					JSONObject workshopNoJson = new JSONObject();
 					workshopNoJson.put("workshopNo", a[i].toString());
 					workshopNoArray.put(workshopNoJson);
@@ -189,7 +190,7 @@ public class SwipeCardLogin extends JFrame {
 	@SuppressWarnings("rawtypes")
 	public Object[] getLineLeader() {
 		// TODO
-		List<User> user;
+		List<Employee> user;
 		Object[] a = null;
 		try {
 			SqlSession session = sqlSessionFactory.openSession();

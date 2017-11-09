@@ -1,7 +1,7 @@
 package com.swipecard.util;
 
-import java.io.FileReader;
 import java.io.Reader;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -16,6 +16,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
+import com.swipecard.model.Employee;
 import com.swipecard.model.SwipeCardTimeInfos;
 import com.swipecard.model.User;
 
@@ -50,20 +51,14 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 		// 先new 一下
 		TableData = new Vector<Object>();
 		
-		// 第0行,都显示表格的坐标
-		Object[] Line1 = { "(0,0)", "(0,1)", new Boolean(false) };
-		// 第1行
-		Object[] Line2 = { "(1,0)", "(1,1)", new Boolean(false) };
-		// 第2行
-		Object[] Line3 = { "(2,0)", "(2,1)", new Boolean(false) };
 		// 将数据挂到线性表形成二维的数据表，形成映射
 		String LineNo = "3L-37";
 		SqlSession session = sqlSessionFactory.openSession();
 
-		List<User> eif = session.selectList("selectUserByLineNoAndWorkshopNo", LineNo);
+		List<SwipeCardTimeInfos> swipeInfos = session.selectList("selectUserByLineNoAndWorkshopNo", LineNo);
 
 		int i = 0;
-		System.out.println(eif.size());
+		System.out.println(swipeInfos.size());
 		Boolean State = false;
 		String sTime1 = "";
 		String sTime2 = "";
@@ -72,16 +67,31 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 		String empId = "";
 	
 		int j = 1;
-		for (i = 0; i < eif.size(); i++) {
-			empId=eif.get(i).getId();
-			Name = eif.get(i).getName();
-			rcno = eif.get(i).getRC_NO();
-			sTime1 = eif.get(i).getSwipeCardTime();
-			sTime2 = eif.get(i).getSwipeCardTime2();
+		for (i = 0; i < swipeInfos.size(); i++) {
+			empId=swipeInfos.get(i).getEMP_ID();
+			Employee empInfo = session.selectOne(
+					"selectUserByEmpId", empId);
+			Name = empInfo.getName();		
+			if(Name==null){
+				Name="";
+			}
+			rcno = swipeInfos.get(i).getRC_NO();
+			if(rcno==null){
+				rcno="";
+			}			
+			Date goWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime();
+			Date outWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime2();
+			SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			if(goWorkSwipeTime!=null && !goWorkSwipeTime.equals("")){				
+				sTime1 = dateFormatter.format(goWorkSwipeTime);
+			}
+			if(outWorkSwipeTime!=null && !outWorkSwipeTime.equals("")){	
+				sTime2 = dateFormatter.format(outWorkSwipeTime);
+			}
 
-			Object[] temp1 = { State, j,empId, Name, sTime1, sTime2, rcno };
+			Object[] tableSwipeInfos = { State, j,empId, Name, sTime1, sTime2, rcno };
 			j++;
-			TableData.add(temp1);
+			TableData.add(tableSwipeInfos);
 		}
 	
 	}
@@ -96,38 +106,46 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 		SwipeCardTimeInfos swipeUser = new SwipeCardTimeInfos();
 		swipeUser.setSwipeCardTime(time);
 		swipeUser.setWorkshopNo(WorkshopNo);
-		List<User> eif = null;
+		List<SwipeCardTimeInfos> swipeInfos = null;
 		try{
 		if(Shift=="D"){
-			 eif = session.selectList(
+			swipeInfos = session.selectList(
 					"selectUserByLineNoAndWorkshopNo_DShift", WorkshopNo);
 		}else if(Shift=="N"){
-			 eif = session.selectList(
+			swipeInfos = session.selectList(
 					"selectUserByLineNoAndWorkshopNo_NShift", swipeUser);
 		}
 
 		int i=0;
 		
 		Boolean State = false;
-		String sTime1 ="";
-		String sTime2 ="";
-		String rcno = "";
-		String Name = "";
-		String empId = "";
+		String sTime1 ="", sTime2 ="",rcno = "",Name = "",empId = "";
 		int j = 1;
-		for(i=0;i<eif.size();i++){
+		for(i=0;i<swipeInfos.size();i++){
 //			System.out.println("lineno: "+eif.get(i).getName());
-			empId=eif.get(i).getId();
-			Name = eif.get(i).getName();
-			rcno = eif.get(i).getRC_NO();
-			sTime1 = eif.get(i).getSwipeCardTime();
-			sTime2 = eif.get(i).getSwipeCardTime2();
-			if(sTime2==null){
-				sTime2="";
+			empId=swipeInfos.get(i).getEMP_ID();
+			Employee empInfo = session.selectOne(
+						"selectUserByEmpId", empId);			
+			Name = empInfo.getName();
+			if(Name==null){
+				Name="";
 			}
-			Object[] temp1 = {State,j,empId,Name,sTime1,sTime2,rcno};
+			rcno = swipeInfos.get(i).getRC_NO();
+			if(rcno==null){
+				rcno="";
+			}				
+			Date goWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime();
+			Date outWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime2();
+			SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			if(goWorkSwipeTime!=null && !goWorkSwipeTime.equals("")){				
+				sTime1 = dateFormatter.format(goWorkSwipeTime);
+			}
+			if(outWorkSwipeTime!=null && !outWorkSwipeTime.equals("")){	
+				sTime2 = dateFormatter.format(outWorkSwipeTime);
+			}
+			Object[] tableSwipeInfos = {State,j,empId,Name,sTime1,sTime2,rcno};
 			j++;
-			TableData.add(temp1);
+			TableData.add(tableSwipeInfos);
 		}
 	}
 		finally {
