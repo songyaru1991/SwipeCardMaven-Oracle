@@ -4,7 +4,6 @@
 "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
 	<typeAliases>
-		<typeAlias alias="User" type="com.swipecard.model.User" />
 		<typeAlias alias="Employee" type="com.swipecard.model.Employee"/>
 		<typeAlias alias="EmpShiftInfos" type="com.swipecard.model.EmpShiftInfos"/>
 		<typeAlias alias="SwipeCardTimeInfos" type="com.swipecard.model.SwipeCardTimeInfos"/>

@@ -58,7 +58,6 @@ import com.swipecard.model.Employee;
 import com.swipecard.model.RCLine;
 import com.swipecard.model.RawRecord;
 import com.swipecard.model.SwipeCardTimeInfos;
-import com.swipecard.model.User;
 
 public class SwipeCard extends JFrame {
 	private final static String CurrentVersion="V20171018";

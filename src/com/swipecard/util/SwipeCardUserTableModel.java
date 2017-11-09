@@ -18,7 +18,6 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import com.swipecard.model.Employee;
 import com.swipecard.model.SwipeCardTimeInfos;
-import com.swipecard.model.User;
 
 public class SwipeCardUserTableModel extends AbstractTableModel {
 
