@@ -48,7 +48,7 @@ import com.swipecard.util.PingDBIPUtil;
 import com.swipecard.util.SwipeCardJButton;
 
 public class SwipeCardNoDB extends JFrame {
-	private final static String CurrentVersion="V20171018";	
+	private final static String CurrentVersion="V20171113";	
 	private static Logger logger = Logger.getLogger(SwipeCardNoDB.class);
 	private String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	private String time;
@@ -373,8 +373,9 @@ public class SwipeCardNoDB extends JFrame {
 	public static void main(String args[]) {
 		InitGlobalFont(new Font("微软雅黑", Font.BOLD, 18));
 		String WorkShopNo = "FD1Q3F1";
-		// JLabelA d = new JLabelA(WorkShopNo, LineNo);
-		SwipeCardNoDB d = new SwipeCardNoDB(null);
+		JsonFileUtil jsonFileUtil = new JsonFileUtil();
+		final String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
+		SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 	}
 
 }

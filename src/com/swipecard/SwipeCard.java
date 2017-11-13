@@ -52,6 +52,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.log4j.Logger;
 
 import com.swipecard.util.FormatDateUtil;
+import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.SwipeCardJButton;
 import com.swipecard.util.SwipeCardUserTableModel;
 import com.swipecard.model.EmpShiftInfos;
@@ -61,7 +62,7 @@ import com.swipecard.model.RawRecord;
 import com.swipecard.model.SwipeCardTimeInfos;
 
 public class SwipeCard extends JFrame {
-	private final static String CurrentVersion="V20171018";
+	private final static String CurrentVersion="V20171113";
 	private static Logger logger = Logger.getLogger(SwipeCard.class);
 	private Vector<Vector<Object>> rowData = new Vector<Vector<Object>>();
 	private JTable table;
@@ -85,6 +86,9 @@ public class SwipeCard extends JFrame {
 	private SwipeCardUserTableModel myModel;
 	private JTable mytable;
 
+	 static JsonFileUtil jsonFileUtil = new JsonFileUtil();
+	  static String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
+	
 	static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
 	static {
@@ -98,7 +102,7 @@ public class SwipeCard extends JFrame {
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 		} catch (Exception e) {
 			logger.error("Error opening session:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(null);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		}
 	}
@@ -1208,7 +1212,7 @@ public class SwipeCard extends JFrame {
 		} catch (Exception e1) {
 			logger.error("取得指示單號異常:"+e1);
 			dispose();
-			SwipeCardNoDB d = new SwipeCardNoDB(null);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e1, e1);
 		} finally {
 			ErrorContext.instance().reset();
