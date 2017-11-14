@@ -90,8 +90,7 @@ public class SwipeCardLogin extends JFrame {
 	    * @param widthRate 宽度比例  
 	    * @param heightRate 高度比例 
 	    */  
-	    private void sizeWindowOnScreen(SwipeCardLogin swipeCardLogin, double widthRate,  
-	            double heightRate)  
+	    private void sizeWindowOnScreen(SwipeCardLogin swipeCardLogin, double widthRate,  double heightRate)  
 	    {  
 	        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  
 	        int swipeCardLoginWidth=(int) (screenSize.width * widthRate);

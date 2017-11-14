@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.TextField;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -125,12 +126,27 @@ public class SwipeCard extends JFrame {
 			curTimeLable.setText(time);
 		}
 	}
+	
+	 /** 
+	    *  
+	    * @param calculator 
+	    * @param widthRate 宽度比例  
+	    * @param heightRate 高度比例 
+	    */  
+	    private void sizeWindowOnScreen(SwipeCard swipeCard, double widthRate, double heightRate)  
+	    {  
+	        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  
+	        int swipeCardWidth=(int) (screenSize.width * widthRate);
+	        int swipeCardHeight=(int) (screenSize.height * heightRate);
+	        swipeCard.setLocation((screenSize.width-swipeCardWidth)/2,(screenSize.height-swipeCardHeight)/2);
+	        swipeCard.setSize(new Dimension(swipeCardWidth,swipeCardHeight));  
+	    }  
 
 	public SwipeCard(final String WorkshopNo) {
 
 		super("產線端刷卡程式-"+CurrentVersion);
-		
-		setBounds(12, 84, 1000, 630);
+		sizeWindowOnScreen(this, 0.51, 0.6);
+		//setBounds(12, 84, 1000, 630);
 		setResizable(true);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 	/*	
