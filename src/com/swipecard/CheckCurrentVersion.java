@@ -20,8 +20,10 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.apache.log4j.Logger;
 
 public class CheckCurrentVersion implements Runnable {
+	private static Logger logger = Logger.getLogger(CheckCurrentVersion.class);
 	private boolean active;
 	private static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
@@ -36,6 +38,7 @@ public class CheckCurrentVersion implements Runnable {
 			 */
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 		} catch (Exception e) {
+			logger.error("版本檢查時 Error building SqlSession，原因:"+e);
 			e.printStackTrace();
 		}
 	}
@@ -66,6 +69,7 @@ public class CheckCurrentVersion implements Runnable {
 			else
 				IsLatest = false;
 		} catch (Exception ex) {
+			logger.error("版本檢查時 Error building SqlSession，原因:"+ex);
 			SwipeCardNoDB d = new SwipeCardNoDB(null);
 			throw ExceptionFactory.wrapException("Cause: " + ex, ex);
 		} finally {
@@ -101,6 +105,7 @@ public class CheckCurrentVersion implements Runnable {
 				}
 
 			} catch (InterruptedException ex) {
+				logger.error("版本檢查時 Error building SqlSession，原因:"+ex);
 				// logger.error(ex.toString());
 				ex.printStackTrace();
 			}

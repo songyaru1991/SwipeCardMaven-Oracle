@@ -1,8 +1,12 @@
 package com.swipecard;
 
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,6 +35,7 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,7 +46,10 @@ import com.swipecard.model.Employee;
 import com.swipecard.model.LineNO;
 
 public class SwipeCardLogin extends JFrame {
-	private final static String CurrentVersion = "V20171018";
+	private final static String CurrentVersion = "V20171113";
+	private static Logger logger = Logger.getLogger(SwipeCardLogin.class);
+	static JsonFileUtil jsonFileUtil = new JsonFileUtil();
+	final static String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
 	private static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
 	static {
@@ -57,8 +65,8 @@ public class SwipeCardLogin extends JFrame {
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 			// System.out.println("sqlSessionFactory:"+sqlSessionFactory);
 		} catch (Exception e) {
-			// e.printStackTrace();
-			SwipeCardNoDB d = new SwipeCardNoDB(null);
+			logger.error("Login時 Error building SqlSession，原因:"+e);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			throw ExceptionFactory.wrapException("Error building SqlSession.", e);
 		}
 	}
@@ -76,21 +84,103 @@ public class SwipeCardLogin extends JFrame {
 	static JTextField jtf1, jtf3;
 	private SwipeCardJButton but1;
 	static JComboBox comboBox1;
+	   /** 
+	    *  
+	    * @param calculator 
+	    * @param widthRate 宽度比例  
+	    * @param heightRate 高度比例 
+	    */  
+	    private void sizeWindowOnScreen(SwipeCardLogin swipeCardLogin, double widthRate,  double heightRate)  
+	    {  
+	        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  
+	        int swipeCardLoginWidth=(int) (screenSize.width * widthRate);
+	        int swipeCardLoginHeight=(int) (screenSize.height * heightRate);
+	        swipeCardLogin.setLocation((screenSize.width-swipeCardLoginWidth)/2,(screenSize.height-swipeCardLoginHeight)/2);
+	        swipeCardLogin.setSize(new Dimension(swipeCardLoginWidth,swipeCardLoginHeight));  
+	    }  
 
+	    /**
+	     * 为界面中的每一个组件指定一个GridBagConstraints对象,通过设置该对象的属性值指出组件在管理器中的布局方案
+	     * @author Yaru_Song
+	     *
+	     */
+	    public class setGBC extends GridBagConstraints  
+	    {  
+	       //初始化左上角位置  ,在y行，x列，行对应的是gridy,列对应的是gridx
+	       public setGBC(int gridx, int gridy)  
+	       {  
+	          this.gridx = gridx;  //第几列
+	          this.gridy = gridy;  //第几行
+	       }  
+	      
+	       //初始化左上角位置和所占行数和列数 ,例:1行2列，则gridwidth=2,gridheight=1
+	       public setGBC(int gridx, int gridy, int gridwidth, int gridheight)  
+	       {  
+	          this.gridx = gridx;       
+	          this.gridy = gridy;  
+	          this.gridwidth = gridwidth;    //占几列
+	          this.gridheight = gridheight;  //占几行
+	       }  
+	      
+	       //对齐方式  
+	       public setGBC setAnchor(int anchor)  
+	       {  
+	          this.anchor = anchor;  
+	          return this;  
+	       }  
+	      
+	       //是否拉伸及拉伸方向  
+	       public setGBC setFill(int fill)  
+	       {  
+	          this.fill = fill;  
+	          return this;  
+	       }  
+	      
+	       //x和y方向上的增量  
+	       public setGBC setWeight(double weightx, double weighty)  
+	       {  
+	          this.weightx = weightx;  
+	          this.weighty = weighty;  
+	          return this;  
+	       }  
+	      
+	       //外部填充  
+	       public setGBC setInsets(int distance)  
+	       {  
+	          this.insets = new Insets(distance, distance, distance, distance);  
+	          return this;  
+	       }  
+	      
+	       //外填充  
+	       public setGBC setInsets(int top, int left, int bottom, int right)  
+	       {  
+	          this.insets = new Insets(top, left, bottom, right);  
+	          return this;  
+	       }  
+	      
+	       //内填充  ,在组件首选大小的基础上x方向上加上ipadx，y方向上加上ipady,保证组件不会收缩到ipadx,ipady所确定的大小以下
+	       public setGBC setIpad(int ipadx, int ipady)  
+	       {  
+	          this.ipadx = ipadx;  
+	          this.ipady = ipady;  
+	          return this;  
+	       }  
+	    }  
+	    
 	public SwipeCardLogin() {
 		super("管理人員登陸-" + CurrentVersion);
-		setBounds(212, 159, 600, 450);
+		//setBounds(212, 159, 600, 450);
+		sizeWindowOnScreen(this, 0.4, 0.5);  
 		setResizable(true);
-
+		
 		Container c = getContentPane();
 		panel1 = new JPanel();
 		panel1.setLayout(null);
 		label1 = new JLabel("實時工時系統", JLabel.CENTER);
 		label2 = new JLabel("管理人員：");
 		label3 = new JLabel("车间：");
-
-		text1 = new JPasswordField("");
-		// text1 = new JPasswordField();
+	
+		text1 = new JPasswordField(10);
 
 		but1 = new SwipeCardJButton("確認 ", 2);
 
@@ -99,11 +189,19 @@ public class SwipeCardLogin extends JFrame {
 		comboBox1.setFont(new Font("微软雅黑", Font.PLAIN, 18));
 
 		jtf1 = (JTextField) comboBox1.getEditor().getEditorComponent();
-		final String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
 		if (defaultWorkshopNo != null) {
 			comboBox1.setSelectedItem(defaultWorkshopNo);
 		}
-
+		
+		label1.setFont(new Font("微软雅黑", Font.BOLD, 40));
+		but1.setFont(new Font("微软雅黑", Font.BOLD, 18));
+		
+	  Container container = getContentPane();
+	    //设置布局管理器为6行8列的GridLayout,组件间水平与垂直间距为5  
+		 container.setLayout(new GridBagLayout());
+		 GridBagConstraints constraints=new GridBagConstraints();
+	
+		/*
 		label1.setBounds(150, 50, 300, 40);
 		label1.setFont(new Font("微软雅黑", Font.BOLD, 40));
 		but1.setFont(new Font("微软雅黑", Font.BOLD, 18));
@@ -112,32 +210,19 @@ public class SwipeCardLogin extends JFrame {
 		but1.setBounds(240, 300, 120, 40);
 
 		label3.setBounds(120, 120, 100, 30);
-		comboBox1.setBounds(220, 120, 160, 40);
-
-		panel1.add(label1);
-		panel1.add(label2);
-		panel1.add(label3);
-		panel1.add(text1);
-		panel1.add(but1);
-		panel1.add(comboBox1);
-		c.add(panel1);
+		comboBox1.setBounds(220, 120, 160, 40);*/
+                                      // (第几列,第几行,占几列,占几行)
+		 container.add(label1,new setGBC(0,0,2,1).setFill(setGBC.CENTER).setIpad(300, 40).setWeight(0, 0).setInsets(10));
+		 container.add(label3,new setGBC(0,2,1,1).setFill(setGBC.EAST).setAnchor(setGBC.EAST).setIpad(10, 0).setWeight(0, 0).setInsets(10,70,10,0));
+		 container.add(label2,new setGBC(0,3,1,1).setFill(setGBC.EAST).setAnchor(setGBC.EAST).setIpad(10, 0).setWeight(0, 0).setInsets(10,70,10,0));
+		 container.add(comboBox1,new setGBC(1,2,1,1).setFill(setGBC.CENTER).setAnchor(setGBC.WEST).setIpad(60, 20).setWeight(0, 0).setInsets(10));
+		 container.add(text1,new setGBC(1,3,1,1).setFill(setGBC.CENTER).setAnchor(setGBC.WEST).setIpad(30, 20).setWeight(0, 0).setInsets(10));
+		 container.add(but1,new setGBC(1,4,2,1).setFill(setGBC.CENTER).setAnchor(setGBC.CENTER).setIpad(35, 20).setWeight(0, 0).setInsets(10,0,10,10));
+		//c.add(panel1);
 		but1.addActionListener(new TextFrame_jButton1_actionAdapter(this));
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		/*
-		 * int fraWidth = this.getWidth();//frame的宽 int fraHeight =
-		 * this.getHeight();//frame的高 Dimension screenSize =
-		 * Toolkit.getDefaultToolkit().getScreenSize(); int screenWidth =
-		 * screenSize.width; int screenHeight = screenSize.height;
-		 * this.setSize(screenWidth, screenHeight); this.setLocation(0, 0);
-		 * float proportionW = screenWidth/fraWidth; float proportionH =
-		 * screenHeight/fraHeight; FrameShowUtil frameShow=new FrameShowUtil();
-		 * frameShow.modifyComponentSize(this, proportionW,proportionH);
-		 * this.toFront();
-		 */
-		/**
-		 * @author
-		 */
+	
 		comboBox1.addItemListener(new ItemListener() {
 
 			@Override
@@ -150,8 +235,6 @@ public class SwipeCardLogin extends JFrame {
 			}
 		});
 	}
-
-	JsonFileUtil jsonFileUtil = new JsonFileUtil();
 
 	public Object[] getWorkshopNo() {// TODO
 		List<LineNO> workshopNoInfo;
@@ -177,9 +260,9 @@ public class SwipeCardLogin extends JFrame {
 				a[0] = "--請選擇車間--";
 			}
 		} catch (Exception e) {
-			System.out.println("Error opening session");
+			logger.error("取得車間異常,原因"+e);
 			dispose();
-			SwipeCardNoDB d = new SwipeCardNoDB(null);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
 		} finally {
 			ErrorContext.instance().reset();
@@ -206,9 +289,9 @@ public class SwipeCardLogin extends JFrame {
 				a[0] = "";
 			}
 		} catch (Exception e) {
-			System.out.println("Error opening session");
+			logger.error("取得管理員卡號異常，原因:"+e);
 			dispose();
-			SwipeCardNoDB d = new SwipeCardNoDB(null);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
 		} finally {
 			ErrorContext.instance().reset();
@@ -238,6 +321,8 @@ public class SwipeCardLogin extends JFrame {
 	}
 }
 
+
+
 class TextFrame_jButton1_actionAdapter implements ActionListener {
 	private SwipeCardLogin adaptee;
 
@@ -252,7 +337,9 @@ class TextFrame_jButton1_actionAdapter implements ActionListener {
 			 */
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 		} catch (Exception e) {
-			SwipeCardNoDB d = new SwipeCardNoDB(null);
+			JsonFileUtil jsonFileUtil = new JsonFileUtil();
+			final String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		}
 	}

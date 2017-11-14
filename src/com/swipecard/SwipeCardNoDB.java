@@ -37,17 +37,19 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.swipecard.util.FormatDateUtil;
 import com.swipecard.util.JsonFileUtil;
-import com.swipecard.util.PingMySqlUtil;
+import com.swipecard.util.PingDBIPUtil;
 import com.swipecard.util.SwipeCardJButton;
 
 public class SwipeCardNoDB extends JFrame {
-	private final static String CurrentVersion="V20171018";
+	private final static String CurrentVersion="V20171113";	
+	private static Logger logger = Logger.getLogger(SwipeCardNoDB.class);
 	private String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	private String time;
 	private int ONE_SECOND = 1000;
@@ -85,7 +87,7 @@ public class SwipeCardNoDB extends JFrame {
 
 		@Override
 		public void run() {
-			PingMySqlUtil PingUtil = new PingMySqlUtil();
+			PingDBIPUtil PingUtil = new PingDBIPUtil();
 		    String ipAddress = "192.168.144.187";
 	        try {
 				 // System.out.println(PingUtil.ping(ipAddress));
@@ -106,6 +108,7 @@ public class SwipeCardNoDB extends JFrame {
 					
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
+				logger.error("ping DB ip時異常，原因:"+e);
 				e.printStackTrace();
 			}
 	      
@@ -330,9 +333,11 @@ public class SwipeCardNoDB extends JFrame {
 							jtextT1_1.setText("卡號為:" + CardID + "的員工\n" + swipeCardTime + "刷卡成功！\n");
 
 						} catch (IOException e1) {
+							logger.error("無DB刷卡時異常，原因:"+e1);
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						} catch (JSONException e1) {
+							logger.error("無DB刷卡時異常，原因:"+e1);
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						} finally {
@@ -368,8 +373,9 @@ public class SwipeCardNoDB extends JFrame {
 	public static void main(String args[]) {
 		InitGlobalFont(new Font("微软雅黑", Font.BOLD, 18));
 		String WorkShopNo = "FD1Q3F1";
-		// JLabelA d = new JLabelA(WorkShopNo, LineNo);
-		SwipeCardNoDB d = new SwipeCardNoDB(null);
+		JsonFileUtil jsonFileUtil = new JsonFileUtil();
+		final String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
+		SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 	}
 
 }

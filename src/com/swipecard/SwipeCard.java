@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.TextField;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -49,8 +50,10 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.apache.log4j.Logger;
 
 import com.swipecard.util.FormatDateUtil;
+import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.SwipeCardJButton;
 import com.swipecard.model.EmpShiftInfos;
 import com.swipecard.model.Employee;
@@ -67,7 +70,8 @@ public class SwipeCard extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1216479862784043108L;
-	private final static String CurrentVersion="V20171018";
+	private final static String CurrentVersion="V20171113";
+	private static Logger logger = Logger.getLogger(SwipeCard.class);
 	private Vector<Vector<Object>> rowData = new Vector<Vector<Object>>();
 	private JTable table;
 	private String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";	
@@ -90,6 +94,9 @@ public class SwipeCard extends JFrame {
 	private SwipeCardUserTableModel myModel;
 	private JTable mytable;
 
+	 static JsonFileUtil jsonFileUtil = new JsonFileUtil();
+	  static String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
+	
 	static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
 	static {
@@ -102,7 +109,8 @@ public class SwipeCard extends JFrame {
 			 */
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 		} catch (Exception e) {
-			SwipeCardNoDB d = new SwipeCardNoDB(null);
+			logger.error("Error opening session:"+e);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		}
 	}
@@ -125,12 +133,29 @@ public class SwipeCard extends JFrame {
 			curTimeLable.setText(time);
 		}
 	}
+	
+	 /** 
+	    *  
+	    * @param calculator 
+	    * @param widthRate 宽度比例  
+	    * @param heightRate 高度比例 
+	    */  
+	    private void sizeWindowOnScreen(SwipeCard swipeCard, double widthRate, double heightRate)  
+	    {  
+	        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  
+	        int swipeCardWidth=(int) (screenSize.width * widthRate);
+	        int swipeCardHeight=(int) (screenSize.height * heightRate);
+	        swipeCard.setLocation((screenSize.width-swipeCardWidth)/2,(screenSize.height-swipeCardHeight)/2);
+	        swipeCard.setSize(new Dimension(swipeCardWidth,swipeCardHeight));  
+	    }  
 
 	public SwipeCard(final String WorkshopNo) {
 
 		super("產線端刷卡程式-"+CurrentVersion);
 		SwipeCardService service=new SwipeCardService();
 		setBounds(12, 84, 1000, 630);
+		sizeWindowOnScreen(this, 0.51, 0.6);
+		//setBounds(12, 84, 1000, 630);
 		setResizable(true);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		Container c = getContentPane();
@@ -355,6 +380,7 @@ public class SwipeCard extends JFrame {
 							}
 
 						} catch (Exception e1) {
+							logger.error(e1);
 							System.out.println("Error opening session");
 							dispose();
 							SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
@@ -498,6 +524,7 @@ public class SwipeCard extends JFrame {
 					// System.out.println("State!"+ mytable.getColumnClass(0));
 				} catch (Exception e1) {
 					System.out.println("Error opening session");
+					logger.error("綁定指示單號失敗,原因:"+e1);
 					dispose();
 					SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
 					throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e1, e1);
@@ -740,6 +767,7 @@ public class SwipeCard extends JFrame {
 							}
 						} catch (Exception e1) {
 							System.out.println("Error opening session");
+							logger.error("刷卡異常,原因:"+e1);
 							dispose();
 							SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
 							throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e1, e1);
@@ -782,7 +810,6 @@ public class SwipeCard extends JFrame {
 		return shift;
 	}
 
-	
 	private void breakShow() {
 		return;
 	}
