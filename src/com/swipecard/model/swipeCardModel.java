@@ -1,4 +1,4 @@
-package com.swipecard.util;
+package com.swipecard.model;
 
 public class swipeCardModel {
 	private String CardID;

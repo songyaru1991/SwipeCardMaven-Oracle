@@ -1,4 +1,4 @@
-package com.swipecard.util;
+package com.swipecard.model;
 
 import java.io.Reader;
 import java.text.SimpleDateFormat;
@@ -17,8 +17,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.log4j.Logger;
 
-import com.swipecard.model.Employee;
-import com.swipecard.model.SwipeCardTimeInfos;
+import com.swipecard.util.FormatDateUtil;
 
 public class SwipeCardUserTableModel extends AbstractTableModel {
 	private static Logger logger = Logger.getLogger(SwipeCardUserTableModel.class);
