@@ -456,7 +456,7 @@ public class SwipeCardService {
 			}
 			else {
 				//上刷時間介於班別15分鐘至班別起始時間，則進行記錄
-				fieldSetting.setFieldColor(Color.RED);
+				fieldSetting.setFieldColor(Color.WHITE);
 				fieldSetting.setFieldContent("上班刷卡\n" + "ID: " + employee.getId() + "\nName: " + employee.getName() + "\n班別： " 
 				+ empCurShift.getClass_desc()
 						+ "\n刷卡時間： " + swipeCardTimeStr + "\n" + "員工上班刷卡成功！\n------------\n");

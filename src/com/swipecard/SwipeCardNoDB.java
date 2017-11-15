@@ -43,6 +43,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.swipecard.util.FormatDateUtil;
+import com.swipecard.util.FrameShowUtil;
 import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.PingDBIPUtil;
 import com.swipecard.util.SwipeCardJButton;
@@ -116,14 +117,10 @@ public class SwipeCardNoDB extends JFrame {
 
 	}
 
-	
-	
 	public SwipeCardNoDB(String workshopNoWithDB) {
 
 		super("產線端刷卡無DB模式"+CurrentVersion);
-		setBounds(12, 84, 1000, 630);
-		setResizable(true);
-		setExtendedState(JFrame.MAXIMIZED_BOTH);
+		//setBounds(12, 84, 1000, 630);		
 
 		Container c = getContentPane();
 		tabbedPane = new JTabbedPane(JTabbedPane.LEFT); // 创建选项卡面板对象
@@ -235,6 +232,11 @@ public class SwipeCardNoDB extends JFrame {
 
 		panel1.add(butT1_5);
 		panel1.add(butT1_6);
+		
+		FrameShowUtil frameShow=new FrameShowUtil();
+		frameShow.sizeWindowOnScreen(this, 0.51, 0.6);
+		setResizable(true);
+		setExtendedState(JFrame.MAXIMIZED_BOTH);
 
 		butT1_5.addActionListener(new ActionListener() {
 

@@ -53,6 +53,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.log4j.Logger;
 
 import com.swipecard.util.FormatDateUtil;
+import com.swipecard.util.FrameShowUtil;
 import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.SwipeCardJButton;
 import com.swipecard.model.EmpShiftInfos;
@@ -133,31 +134,14 @@ public class SwipeCard extends JFrame {
 			curTimeLable.setText(time);
 		}
 	}
-	
-	 /** 
-	    *  
-	    * @param calculator 
-	    * @param widthRate 宽度比例  
-	    * @param heightRate 高度比例 
-	    */  
-	    private void sizeWindowOnScreen(SwipeCard swipeCard, double widthRate, double heightRate)  
-	    {  
-	        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  
-	        int swipeCardWidth=(int) (screenSize.width * widthRate);
-	        int swipeCardHeight=(int) (screenSize.height * heightRate);
-	        swipeCard.setLocation((screenSize.width-swipeCardWidth)/2,(screenSize.height-swipeCardHeight)/2);
-	        swipeCard.setSize(new Dimension(swipeCardWidth,swipeCardHeight));  
-	    }  
 
 	public SwipeCard(final String WorkshopNo) {
 
 		super("產線端刷卡程式-"+CurrentVersion);
 		SwipeCardService service=new SwipeCardService();
-		setBounds(12, 84, 1000, 630);
-		sizeWindowOnScreen(this, 0.51, 0.6);
-		//setBounds(12, 84, 1000, 630);
+		//setBounds(12, 84, 1000, 630);		
 		setResizable(true);
-		setExtendedState(JFrame.MAXIMIZED_BOTH);
+		
 		Container c = getContentPane();
 		tabbedPane = new JTabbedPane(JTabbedPane.LEFT); // 创建选项卡面板对象
 		// 创建标签
@@ -357,7 +341,12 @@ public class SwipeCard extends JFrame {
 		panel2.add(comboBox2);
 
 		panel2.add(myScrollPane);
-
+		
+		FrameShowUtil frameShow=new FrameShowUtil();
+		frameShow.sizeWindowOnScreen(this, 0.51, 0.6);
+			
+		setExtendedState(JFrame.MAXIMIZED_BOTH);
+		
 		// ItemListene取得用户选取的项目,ActionListener在JComboBox上自行输入完毕后按下[Enter]键,运作相对应的工作
 		comboBox.addItemListener(new ItemListener() {
 			@Override

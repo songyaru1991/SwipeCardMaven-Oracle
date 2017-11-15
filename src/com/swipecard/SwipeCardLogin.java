@@ -1,18 +1,14 @@
 package com.swipecard;
 
-import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.util.Enumeration;
 import java.util.List;
@@ -40,6 +36,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.swipecard.util.FrameShowUtil;
 import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.SwipeCardJButton;
 import com.swipecard.model.Employee;
@@ -84,20 +81,6 @@ public class SwipeCardLogin extends JFrame {
 	static JTextField jtf1, jtf3;
 	private SwipeCardJButton but1;
 	static JComboBox comboBox1;
-	   /** 
-	    *  
-	    * @param calculator 
-	    * @param widthRate 宽度比例  
-	    * @param heightRate 高度比例 
-	    */  
-	    private void sizeWindowOnScreen(SwipeCardLogin swipeCardLogin, double widthRate,  double heightRate)  
-	    {  
-	        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  
-	        int swipeCardLoginWidth=(int) (screenSize.width * widthRate);
-	        int swipeCardLoginHeight=(int) (screenSize.height * heightRate);
-	        swipeCardLogin.setLocation((screenSize.width-swipeCardLoginWidth)/2,(screenSize.height-swipeCardLoginHeight)/2);
-	        swipeCardLogin.setSize(new Dimension(swipeCardLoginWidth,swipeCardLoginHeight));  
-	    }  
 
 	    /**
 	     * 为界面中的每一个组件指定一个GridBagConstraints对象,通过设置该对象的属性值指出组件在管理器中的布局方案
@@ -169,9 +152,8 @@ public class SwipeCardLogin extends JFrame {
 	    
 	public SwipeCardLogin() {
 		super("管理人員登陸-" + CurrentVersion);
-		//setBounds(212, 159, 600, 450);
-		sizeWindowOnScreen(this, 0.4, 0.5);  
-		setResizable(true);
+		//setBounds(212, 159, 600, 450);			
+		setResizable(false);
 		
 		Container c = getContentPane();
 		panel1 = new JPanel();
@@ -222,7 +204,14 @@ public class SwipeCardLogin extends JFrame {
 		but1.addActionListener(new TextFrame_jButton1_actionAdapter(this));
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 	
+		//setMaximumSize(new Dimension(400, 200));//设置最大值
+	  //  setMinimumSize(new Dimension(200, 100));//设置最小值
+		
+     	FrameShowUtil frameShow=new FrameShowUtil();		
+        frameShow.sizeWindowOnScreen(this, 0.4, 0.5); 
+		
 		comboBox1.addItemListener(new ItemListener() {
 
 			@Override
