@@ -67,11 +67,9 @@ import com.swipecard.model.WorkedOneWeek;
 import com.swipecard.services.SwipeCardService;
 
 public class SwipeCard extends JFrame {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1216479862784043108L;
-	private final static String CurrentVersion="V20171113";
+	private final static String CurrentVersion="V20171113(FD通訊不卡七休一)";
 	private static Logger logger = Logger.getLogger(SwipeCard.class);
 	private Vector<Vector<Object>> rowData = new Vector<Vector<Object>>();
 	private JTable table;
@@ -208,9 +206,6 @@ public class SwipeCard extends JFrame {
 		labelT2_2 = new JLabel("指示單號:");
 		labelT2_3 = new JLabel("標準人數:");
 
-		Timer tmr = new Timer();
-		tmr.scheduleAtFixedRate(new JLabelTimerTask(), new Date(), ONE_SECOND);
-
 		curTimeLable = new JLabel();
 		curTimeLable.setFont(new Font("微软雅黑", Font.BOLD, 35));
 
@@ -346,6 +341,9 @@ public class SwipeCard extends JFrame {
 		frameShow.sizeWindowOnScreen(this, 0.51, 0.6);
 			
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
+		
+		Timer tmr = new Timer();
+		tmr.scheduleAtFixedRate(new JLabelTimerTask(), new Date(), ONE_SECOND);
 		
 		// ItemListene取得用户选取的项目,ActionListener在JComboBox上自行输入完毕后按下[Enter]键,运作相对应的工作
 		comboBox.addItemListener(new ItemListener() {
@@ -574,7 +572,8 @@ public class SwipeCard extends JFrame {
 
 							Employee eif = (Employee) session.selectOne("selectUserByCardID", CardID);
 							//只要刷卡都將記錄至raw_record table
-							swipeCardService.addRawSwipeRecord(session, eif, CardID, swipeCardTime, WorkshopNo);
+							String Record_Status=null;
+							swipeCardService.addRawSwipeRecord(session, eif, CardID, swipeCardTime, WorkshopNo,Record_Status);
 							RawRecord swipeRecord = new RawRecord();
 							swipeRecord.setCardID(CardID);
 							swipeRecord.setSwipeCardTime(swipeCardTime);
@@ -598,7 +597,6 @@ public class SwipeCard extends JFrame {
 								 */
 								jtextT1_1.setText("當前刷卡人員不存在；可能是新進人員，或是舊卡丟失補辦，人員資料暫時未更新，請線長記錄，協助助理走原有簽核流程！\n");
 								jtextT1_1.setBackground(Color.RED);	
-								session.insert("insertLoseEmpSwipeRecord", swipeRecord);
 								session.update("updateRawRecordStatus",swipeRecord);
 								session.commit();
 
@@ -676,9 +674,8 @@ public class SwipeCard extends JFrame {
 												userNSwipe.setWorkshopNo(WorkshopNo);
 												
 
-												if (curShift.equals("N")) {
-													Date swipeTime = new Date();
-													if (swipeTime.getHours() < 12) {
+												if (curShift.equals("N")) {													
+													if (swipeCardTime.getHours() < 12) {
 														fieldSetting=swipeCardService.offDutyNightShiftSwipeCard(session, RC_NO, PRIMARY_ITEM_NO, WorkshopNo, eif, SwipeCardTime2, empYesShift);
 														showLabelContent(fieldSetting);
 													} else {
@@ -755,11 +752,10 @@ public class SwipeCard extends JFrame {
 								}
 							}
 						} catch (Exception e1) {
-							System.out.println("Error opening session");
 							logger.error("刷卡異常,原因:"+e1);
 							dispose();
 							SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
-							throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e1, e1);
+							throw ExceptionFactory.wrapException("刷卡異常,原因:" + e1, e1);
 						} finally {
 							ErrorContext.instance().reset();
 							if (session != null) {

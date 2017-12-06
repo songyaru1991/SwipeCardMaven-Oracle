@@ -243,7 +243,7 @@ public class SwipeCardLogin extends JFrame {
 					workshopNoArray.put(workshopNoJson);
 				}
 				String fileName = "WorkshopNo.json";
-				jsonFileUtil.createJsonFile(workshopNoArray.toString(), fileName);
+				jsonFileUtil.createWorkshopNoJsonFile(workshopNoArray.toString(), fileName);
 			} else {
 				a = new Object[1];
 				a[0] = "--請選擇車間--";

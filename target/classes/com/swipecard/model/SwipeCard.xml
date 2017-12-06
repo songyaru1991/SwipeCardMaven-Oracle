@@ -252,20 +252,19 @@
    <select id="getOnDutyTimeValid" statementType="CALLABLE" parameterType="java.util.Map" resultType="java.util.Map">
    	{call swipecard.VALIDATE_ON_DUTY_TIME(#{onDutyTime,jdbcType=DATE,javaType=DATE,mode=IN}),#{empID,jdbcType=VARCHAR,javaType=STRING,mode=IN},#{isOnDutyTimeValid,jdbcType=INTEGER,javaType=int,mode=out})}
    </select>
-   
-   <!-- Insertlose_emplyee to raw_record table -->
-   <insert id="insertLoseEmpSwipeRecord" parameterType="RawRecord">
-		INSERT INTO raw_record
-			(cardid,SwipeCardTime,update_time)
-		VALUES 
-			(#{CardID},#{SwipeCardTime},sysdate)
-    </insert>
     
    <!-- Insert row swipe record to raw_record table -->
    <insert id="addRawSwipeRecord" parameterType="RawRecord">
-		INSERT INTO raw_record (Id,CardID,SwipeCardTime,update_time)
-		VALUES
-		(#{Id},#{CardID},#{SwipeCardTime},sysdate)
+       <if test="Record_Status==null">
+           INSERT INTO raw_record (Id,CardID,SwipeCardTime,update_time,ip_address)
+           VALUES
+           (#{Id},#{CardID},#{SwipeCardTime},sysdate,#{swipeCardHostIp})
+		</if>
+		<if test="Record_Status!=null">
+		    INSERT INTO raw_record (Id,CardID,SwipeCardTime,update_time,record_status,ip_address)
+		    VALUES
+		    (#{Id},#{CardID},#{SwipeCardTime},sysdate,#{Record_Status},#{swipeCardHostIp})
+		</if>
    </insert>
    
     <update id="updateRawRecordStatus" parameterType="RawRecord">

@@ -22,6 +22,12 @@ public class FormatDateUtil {
 		return curDate;
 	}
 	
+	public static String getHHMM(){
+		SimpleDateFormat df = new SimpleDateFormat("-HH-mm");
+		String ti  = df.format(new Date());
+		return ti;
+	}
+	
 	public static String getYesterdayDate(){
 		Date nowTime = new Date();   //当前时间
 		Calendar calendar = Calendar.getInstance(); //得到日历

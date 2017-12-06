@@ -42,6 +42,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.swipecard.swipeRecordLog.SwipeRecordLogToDB;
 import com.swipecard.util.FormatDateUtil;
 import com.swipecard.util.FrameShowUtil;
 import com.swipecard.util.JsonFileUtil;
@@ -100,8 +101,8 @@ public class SwipeCardNoDB extends JFrame {
 					if(PingUtil.ping(ipAddress, 5, 5000))
 					{
 						//暂时不启用无网络刷卡记录回写DB模式
-					//	SwipeRecordLogToDB logToDB=new SwipeRecordLogToDB();
-					//	logToDB.SwipeRecordLogToDB();
+						SwipeRecordLogToDB logToDB=new SwipeRecordLogToDB();
+						logToDB.SwipeRecordLogToDB();
 						dispose();
 						SwipeCard swipe = new SwipeCard(selectWorkShopNo);
 					    this.cancel();
@@ -157,12 +158,6 @@ public class SwipeCardNoDB extends JFrame {
 		}
 
 		jtf1 = (JTextField) comboBox1.getEditor().getEditorComponent();
-
-		 Timer tmr = new Timer();
-		tmr.scheduleAtFixedRate(new JLabelTimerTask(), new Date(), ONE_SECOND);
-
-	     final Timer checkDBLinktmr = new Timer();
-		checkDBLinktmr.scheduleAtFixedRate(new CheckDBLinkTimerTask(),5 * 60 * 1000, 5 * 60 * 1000);
 		
 		curTimeLable = new JLabel();
 		curTimeLable.setFont(new Font("微软雅黑", Font.BOLD, 35));
@@ -237,6 +232,13 @@ public class SwipeCardNoDB extends JFrame {
 		frameShow.sizeWindowOnScreen(this, 0.51, 0.6);
 		setResizable(true);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
+		
+
+		 Timer tmr = new Timer();
+		tmr.scheduleAtFixedRate(new JLabelTimerTask(), new Date(), ONE_SECOND);
+
+	     final Timer checkDBLinktmr = new Timer();
+		checkDBLinktmr.scheduleAtFixedRate(new CheckDBLinkTimerTask(),5 * 60 * 1000, 5 * 60 * 1000);
 
 		butT1_5.addActionListener(new ActionListener() {
 
@@ -288,7 +290,7 @@ public class SwipeCardNoDB extends JFrame {
 							swipeTimeLable.setText(swipeCardTime);
 							swipeCardRecord.put("WorkshopNo", selectWorkShopNo);
 							// String filePath = System.getProperty("user.dir");
-							String filePath = "D:/swipecard/logs/";
+							String filePath = "D:/SwipeCard/logs/SwipeCardRecordLogs/";
 							String fileName = "swipeCardRecord" + FormatDateUtil.getCurDate() + ".json";
 							String swipeCardRecordSavePath = filePath + fileName;
 							File file = new File(swipeCardRecordSavePath);
