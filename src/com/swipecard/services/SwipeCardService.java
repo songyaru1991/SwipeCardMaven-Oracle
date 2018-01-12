@@ -186,17 +186,19 @@ public class SwipeCardService {
 			if(Id==null){
 				Id="";
 			}
-			GetLocalHostIpAndName hostIP=new GetLocalHostIpAndName();
-			String swipeCardHostIp=hostIP.getLocalHostIP();
+			synchronized (this) {	
+				GetLocalHostIpAndName hostIP=new GetLocalHostIpAndName();
+				String swipeCardHostIp=hostIP.getLocalHostIP();
 			
-			RawRecord swipeRecord=new RawRecord();
-			swipeRecord.setCardID(CardID);
-			swipeRecord.setId(Id);
-			swipeRecord.setSwipeCardTime(SwipeCardTime);
-			swipeRecord.setRecord_Status(Record_Status);
-			swipeRecord.setSwipeCardHostIp(swipeCardHostIp);
-			session.insert("addRawSwipeRecord", swipeRecord);
-			session.commit();
+				RawRecord swipeRecord=new RawRecord();
+				swipeRecord.setCardID(CardID);
+				swipeRecord.setId(Id);
+				swipeRecord.setSwipeCardTime(SwipeCardTime);
+				swipeRecord.setRecord_Status(Record_Status);
+				swipeRecord.setSwipeCardHostIp(swipeCardHostIp);
+				session.insert("addRawSwipeRecord", swipeRecord);
+				session.commit();
+			}
 		}
 		catch(Exception ex) {
 			SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
@@ -472,18 +474,19 @@ public class SwipeCardService {
 				fieldSetting.setFieldContent("上班刷卡\n" + "ID: " + employee.getId() + "\nName: " + employee.getName() + "\n班別： " 
 				+ empCurShift.getClass_desc()
 						+ "\n刷卡時間： " + swipeCardTimeStr + "\n" + "員工上班刷卡成功！\n------------\n");
-				
-				SwipeCardTimeInfos userSwipe = new SwipeCardTimeInfos();
-				userSwipe.setEMP_ID(employee.getId());
-				userSwipe.setSWIPE_DATE(curDate);
-				userSwipe.setSwipeCardTime(swipeCardTime);
-				userSwipe.setRC_NO(RCNO);
-				userSwipe.setPRIMARY_ITEM_NO(PrimaryItemNo);
-				userSwipe.setWorkshopNo(workShopNo);
-				userSwipe.setShift(empCurShift.getShift());
-				userSwipe.setCLASS_NO(empCurShift.getClass_no());
-				session.insert("insertUserByOnDNShift", userSwipe);
-				session.commit();
+				synchronized (this) {	
+					SwipeCardTimeInfos userSwipe = new SwipeCardTimeInfos();
+					userSwipe.setEMP_ID(employee.getId());
+					userSwipe.setSWIPE_DATE(curDate);
+					userSwipe.setSwipeCardTime(swipeCardTime);
+					userSwipe.setRC_NO(RCNO);
+					userSwipe.setPRIMARY_ITEM_NO(PrimaryItemNo);
+					userSwipe.setWorkshopNo(workShopNo);
+					userSwipe.setShift(empCurShift.getShift());
+					userSwipe.setCLASS_NO(empCurShift.getClass_no());
+					session.insert("insertUserByOnDNShift", userSwipe);
+					session.commit();
+				}
 			}
 		}
 		catch(Exception ex) {
@@ -593,11 +596,13 @@ public class SwipeCardService {
 									else {
 										int outWorkCardCount =  session.selectOne("selectOutWorkByCardID", userSwipe);
 										if(outWorkCardCount==0) {
-											fieldSetting.setFieldColor(Color.WHITE);
-											fieldSetting.setFieldContent("下班刷卡\n" + "ID: " + employee.getId() + "\nName: " + employee.getName()
-											+ "\n刷卡時間： " + FormatDateUtil.changeTimeToStr(swipeCardTime) + "\n今日班別為："+empCurShift.getClass_desc()+ "\n" + "員工下班刷卡成功！\n------------\n");
-											session.insert("insertOutWorkSwipeTime",userSwipe);
-											session.commit();
+											synchronized (this) {	
+												fieldSetting.setFieldColor(Color.WHITE);
+												fieldSetting.setFieldContent("下班刷卡\n" + "ID: " + employee.getId() + "\nName: " + employee.getName()
+												+ "\n刷卡時間： " + FormatDateUtil.changeTimeToStr(swipeCardTime) + "\n今日班別為："+empCurShift.getClass_desc()+ "\n" + "員工下班刷卡成功！\n------------\n");
+												session.insert("insertOutWorkSwipeTime",userSwipe);
+												session.commit();
+											}
 										}
 										else {
 											fieldSetting.setFieldColor(Color.RED);
