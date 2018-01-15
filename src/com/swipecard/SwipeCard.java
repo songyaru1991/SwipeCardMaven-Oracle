@@ -133,7 +133,7 @@ public class SwipeCard extends JFrame {
 		}
 	}
 
-	public SwipeCard(final String WorkshopNo) {
+	public SwipeCard(final String WorkshopNo, String selectLineNo) {
 
 		super("產線端刷卡程式-"+CurrentVersion);
 		SwipeCardService service=new SwipeCardService();
@@ -814,7 +814,7 @@ public class SwipeCard extends JFrame {
 		InitGlobalFont(new Font("微软雅黑", Font.BOLD, 18));
 		String WorkShopNo = "FD1Q3F1";
 		// JLabelA d = new JLabelA(WorkShopNo, LineNo);
-		SwipeCard d = new SwipeCard(WorkShopNo);
+		SwipeCard d = new SwipeCard(WorkShopNo,null);
 	}
 
 	public void update() {

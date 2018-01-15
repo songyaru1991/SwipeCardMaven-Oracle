@@ -10,8 +10,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,7 +51,7 @@ public class SwipeCardLogin extends JFrame {
 	private final static String CurrentVersion = "V20171113";
 	private static Logger logger = Logger.getLogger(SwipeCardLogin.class);
 	static JsonFileUtil jsonFileUtil = new JsonFileUtil();
-	final static String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
+	final  String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
 	private static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
 	static {
@@ -62,8 +67,8 @@ public class SwipeCardLogin extends JFrame {
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 			// System.out.println("sqlSessionFactory:"+sqlSessionFactory);
 		} catch (Exception e) {
-			logger.error("Login時 Error building SqlSession，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			logger.error("Login時 Error building SqlSession，原因:" + e);
+			SwipeCardNoDB d = new SwipeCardNoDB(null);
 			throw ExceptionFactory.wrapException("Error building SqlSession.", e);
 		}
 	}
@@ -74,95 +79,95 @@ public class SwipeCardLogin extends JFrame {
 
 	final Object[] WorkshopNo = getWorkshopNo();
 	final Object[] LineLeader = getLineLeader();
+	final JSONObject LineNoObject = getLineNoObject();
+	Object[] lineno = null;
 
 	private JPanel panel1;
-	private JLabel label1, label2, label3;
+	private JLabel label1, label2, label3, label4;
 	static JPasswordField text1;
 	static JTextField jtf1, jtf3;
 	private SwipeCardJButton but1;
-	static JComboBox comboBox1;
+	static JComboBox comboBox1, comboBox2;
 
-	    /**
-	     * 为界面中的每一个组件指定一个GridBagConstraints对象,通过设置该对象的属性值指出组件在管理器中的布局方案
-	     * @author Yaru_Song
-	     *
-	     */
-	    public class setGBC extends GridBagConstraints  
-	    {  
-	       //初始化左上角位置  ,在y行，x列，行对应的是gridy,列对应的是gridx
-	       public setGBC(int gridx, int gridy)  
-	       {  
-	          this.gridx = gridx;  //第几列
-	          this.gridy = gridy;  //第几行
-	       }  
-	      
-	       //初始化左上角位置和所占行数和列数 ,例:1行2列，则gridwidth=2,gridheight=1
-	       public setGBC(int gridx, int gridy, int gridwidth, int gridheight)  
-	       {  
-	          this.gridx = gridx;       
-	          this.gridy = gridy;  
-	          this.gridwidth = gridwidth;    //占几列
-	          this.gridheight = gridheight;  //占几行
-	       }  
-	      
-	       //对齐方式  
-	       public setGBC setAnchor(int anchor)  
-	       {  
-	          this.anchor = anchor;  
-	          return this;  
-	       }  
-	      
-	       //是否拉伸及拉伸方向  
-	       public setGBC setFill(int fill)  
-	       {  
-	          this.fill = fill;  
-	          return this;  
-	       }  
-	      
-	       //x和y方向上的增量  
-	       public setGBC setWeight(double weightx, double weighty)  
-	       {  
-	          this.weightx = weightx;  
-	          this.weighty = weighty;  
-	          return this;  
-	       }  
-	      
-	       //外部填充  
-	       public setGBC setInsets(int distance)  
-	       {  
-	          this.insets = new Insets(distance, distance, distance, distance);  
-	          return this;  
-	       }  
-	      
-	       //外填充  
-	       public setGBC setInsets(int top, int left, int bottom, int right)  
-	       {  
-	          this.insets = new Insets(top, left, bottom, right);  
-	          return this;  
-	       }  
-	      
-	       //内填充  ,在组件首选大小的基础上x方向上加上ipadx，y方向上加上ipady,保证组件不会收缩到ipadx,ipady所确定的大小以下
-	       public setGBC setIpad(int ipadx, int ipady)  
-	       {  
-	          this.ipadx = ipadx;  
-	          this.ipady = ipady;  
-	          return this;  
-	       }  
-	    }  
-	    
+	/**
+	 * 为界面中的每一个组件指定一个GridBagConstraints对象,通过设置该对象的属性值指出组件在管理器中的布局方案
+	 * 
+	 * @author Yaru_Song
+	 *
+	 */
+	public class setGBC extends GridBagConstraints {
+		// 初始化左上角位置 ,在y行，x列，行对应的是gridy,列对应的是gridx
+		public setGBC(int gridx, int gridy) {
+			this.gridx = gridx; // 第几列
+			this.gridy = gridy; // 第几行
+		}
+
+		// 初始化左上角位置和所占行数和列数 ,例:1行2列，则gridwidth=2,gridheight=1
+		public setGBC(int gridx, int gridy, int gridwidth, int gridheight) {
+			this.gridx = gridx;
+			this.gridy = gridy;
+			this.gridwidth = gridwidth; // 占几列
+			this.gridheight = gridheight; // 占几行
+		}
+
+		// 对齐方式
+		public setGBC setAnchor(int anchor) {
+			this.anchor = anchor;
+			return this;
+		}
+
+		// 是否拉伸及拉伸方向
+		public setGBC setFill(int fill) {
+			this.fill = fill;
+			return this;
+		}
+
+		// x和y方向上的增量
+		public setGBC setWeight(double weightx, double weighty) {
+			this.weightx = weightx;
+			this.weighty = weighty;
+			return this;
+		}
+
+		// 外部填充
+		public setGBC setInsets(int distance) {
+			this.insets = new Insets(distance, distance, distance, distance);
+			return this;
+		}
+
+		// 外填充
+		public setGBC setInsets(int top, int left, int bottom, int right) {
+			this.insets = new Insets(top, left, bottom, right);
+			return this;
+		}
+
+		// 内填充 ,在组件首选大小的基础上x方向上加上ipadx，y方向上加上ipady,保证组件不会收缩到ipadx,ipady所确定的大小以下
+		public setGBC setIpad(int ipadx, int ipady) {
+			this.ipadx = ipadx;
+			this.ipady = ipady;
+			return this;
+		}
+	}
+
 	public SwipeCardLogin() {
 		super("管理人員登陸-" + CurrentVersion);
-		//setBounds(212, 159, 600, 450);			
+		// setBounds(212, 159, 600, 450);
 		setResizable(false);
-		
+
 		Container c = getContentPane();
 		panel1 = new JPanel();
 		panel1.setLayout(null);
 		label1 = new JLabel("實時工時系統", JLabel.CENTER);
 		label2 = new JLabel("管理人員：");
 		label3 = new JLabel("车间：");
-	
+		label4 = new JLabel("線別：");
+
 		text1 = new JPasswordField(10);
+		if(!(defaultWorkshopNo == null || defaultWorkshopNo.equals(""))){
+			text1.setEchoChar((char) 0);
+			text1.setText("不需要刷卡");
+			text1.setEditable(false);
+		}
 
 		but1 = new SwipeCardJButton("確認 ", 2);
 
@@ -170,48 +175,69 @@ public class SwipeCardLogin extends JFrame {
 		comboBox1.setEditable(false);// 設置comboBox1為不可編輯，此時jtf1不生效
 		comboBox1.setFont(new Font("微软雅黑", Font.PLAIN, 18));
 
+		comboBox2 = new JComboBox();
+		comboBox2.setFont(new Font("微软雅黑", Font.PLAIN, 18));
+
 		jtf1 = (JTextField) comboBox1.getEditor().getEditorComponent();
 		if (defaultWorkshopNo != null) {
 			comboBox1.setSelectedItem(defaultWorkshopNo);
 		}
-		
-		label1.setFont(new Font("微软雅黑", Font.BOLD, 40));
-		but1.setFont(new Font("微软雅黑", Font.BOLD, 18));
-		
-	  Container container = getContentPane();
-	    //设置布局管理器为6行8列的GridLayout,组件间水平与垂直间距为5  
-		 container.setLayout(new GridBagLayout());
-		 GridBagConstraints constraints=new GridBagConstraints();
-	
-		/*
-		label1.setBounds(150, 50, 300, 40);
-		label1.setFont(new Font("微软雅黑", Font.BOLD, 40));
-		but1.setFont(new Font("微软雅黑", Font.BOLD, 18));
-		label2.setBounds(120, 200, 100, 30);
-		text1.setBounds(220, 200, 160, 40);
-		but1.setBounds(240, 300, 120, 40);
 
-		label3.setBounds(120, 120, 100, 30);
-		comboBox1.setBounds(220, 120, 160, 40);*/
-                                      // (第几列,第几行,占几列,占几行)
-		 container.add(label1,new setGBC(0,0,2,1).setFill(setGBC.CENTER).setIpad(300, 40).setWeight(0, 0).setInsets(10));
-		 container.add(label3,new setGBC(0,2,1,1).setFill(setGBC.EAST).setAnchor(setGBC.EAST).setIpad(10, 0).setWeight(0, 0).setInsets(10,70,10,0));
-		 container.add(label2,new setGBC(0,3,1,1).setFill(setGBC.EAST).setAnchor(setGBC.EAST).setIpad(10, 0).setWeight(0, 0).setInsets(10,70,10,0));
-		 container.add(comboBox1,new setGBC(1,2,1,1).setFill(setGBC.CENTER).setAnchor(setGBC.WEST).setIpad(60, 20).setWeight(0, 0).setInsets(10));
-		 container.add(text1,new setGBC(1,3,1,1).setFill(setGBC.CENTER).setAnchor(setGBC.WEST).setIpad(30, 20).setWeight(0, 0).setInsets(10));
-		 container.add(but1,new setGBC(1,4,2,1).setFill(setGBC.CENTER).setAnchor(setGBC.CENTER).setIpad(35, 20).setWeight(0, 0).setInsets(10,0,10,10));
-		//c.add(panel1);
+		lineno = getLineno(comboBox1.getSelectedItem().toString());
+		if (lineno != null) {
+			for (Object object : lineno) {
+				comboBox2.addItem(object);
+			}
+		} else {
+			comboBox2.addItem("不需要選擇線號");
+		}
+
+		label1.setFont(new Font("微软雅黑", Font.BOLD, 40));
+		but1.setFont(new Font("微软雅黑", Font.BOLD, 18));
+
+		Container container = getContentPane();
+		// 设置布局管理器为6行8列的GridLayout,组件间水平与垂直间距为5
+		container.setLayout(new GridBagLayout());
+		GridBagConstraints constraints = new GridBagConstraints();
+
+		/*
+		 * label1.setBounds(150, 50, 300, 40); label1.setFont(new Font("微软雅黑",
+		 * Font.BOLD, 40)); but1.setFont(new Font("微软雅黑", Font.BOLD, 18));
+		 * label2.setBounds(120, 200, 100, 30); text1.setBounds(220, 200, 160,
+		 * 40); but1.setBounds(240, 300, 120, 40);
+		 * 
+		 * label3.setBounds(120, 120, 100, 30); comboBox1.setBounds(220, 120,
+		 * 160, 40);
+		 */
+		// (第几列,第几行,占几列,占几行)
+		container.add(label1,
+				new setGBC(0, 0, 2, 1).setFill(setGBC.CENTER).setIpad(300, 40).setWeight(0, 0).setInsets(10));
+		container.add(label3, new setGBC(0, 2, 1, 1).setFill(setGBC.EAST).setAnchor(setGBC.EAST).setIpad(10, 0)
+				.setWeight(0, 0).setInsets(10, 70, 10, 0));
+		container.add(label2, new setGBC(0, 3, 1, 1).setFill(setGBC.EAST).setAnchor(setGBC.EAST).setIpad(10, 0)
+				.setWeight(0, 0).setInsets(10, 70, 10, 0));
+		container.add(label4, new setGBC(0, 4, 1, 1).setFill(setGBC.EAST).setAnchor(setGBC.EAST).setIpad(10, 0)
+				.setWeight(0, 0).setInsets(10, 70, 10, 0));
+		container.add(comboBox1, new setGBC(1, 2, 1, 1).setFill(setGBC.CENTER).setAnchor(setGBC.WEST).setIpad(60, 20)
+				.setWeight(0, 0).setInsets(10));
+		container.add(comboBox2, new setGBC(1, 4, 1, 1).setFill(setGBC.CENTER).setAnchor(setGBC.WEST).setIpad(60, 20)
+				.setWeight(0, 0).setInsets(10));
+		container.add(text1, new setGBC(1, 3, 1, 1).setFill(setGBC.CENTER).setAnchor(setGBC.WEST).setIpad(30, 20)
+				.setWeight(0, 0).setInsets(10));
+		container.add(but1, new setGBC(1, 5, 2, 1).setFill(setGBC.CENTER).setAnchor(setGBC.CENTER).setIpad(35, 20)
+				.setWeight(0, 0).setInsets(10, 0, 10, 10));
+		// c.add(panel1);
 		but1.addActionListener(new TextFrame_jButton1_actionAdapter(this));
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-	
-		//setMaximumSize(new Dimension(400, 200));//设置最大值
-	  //  setMinimumSize(new Dimension(200, 100));//设置最小值
 		
-     	FrameShowUtil frameShow=new FrameShowUtil();		
-        frameShow.sizeWindowOnScreen(this, 0.4, 0.5); 
-		
+		// setMaximumSize(new Dimension(400, 200));//设置最大值
+		// setMinimumSize(new Dimension(200, 100));//设置最小值
+
+		FrameShowUtil frameShow = new FrameShowUtil();
+		frameShow.sizeWindowOnScreen(this, 0.4, 0.5);
+
 		comboBox1.addItemListener(new ItemListener() {
 
 			@Override
@@ -220,9 +246,94 @@ public class SwipeCardLogin extends JFrame {
 
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					String key = jtf1.getText();
+					lineno = getLineno(comboBox1.getSelectedItem().toString());
+					comboBox2.removeAllItems();
+					if (lineno != null) {
+						for (Object object : lineno) {
+							comboBox2.addItem(object);
+						}
+					} else {
+						comboBox2.addItem("不需要選擇線號");
+					}
 				}
 			}
 		});
+	}
+
+	private JSONObject getLineNoObject() {
+		// TODO Auto-generated method stub
+		List<LineNO> LineNo;
+		JSONObject jsonObject = new JSONObject();
+		Map<String, String> map = new HashMap<String, String>();
+		try {
+			SqlSession session = sqlSessionFactory.openSession();
+			LineNo = session.selectList("selectLineNoList");
+			int con = LineNo.size();
+			if (con > 0) {
+				for (int i = 0; i < con; i++) {
+					if (map.containsKey(LineNo.get(i).getWorkShopNo())) {
+						String str = map.get(LineNo.get(i).getWorkShopNo()) + "," + LineNo.get(i).getLineNo();
+						map.put(LineNo.get(i).getWorkShopNo(), str);
+					} else {
+						map.put(LineNo.get(i).getWorkShopNo(), LineNo.get(i).getLineNo());
+					}
+				}
+				Iterator<Entry<String, String>> entries = map.entrySet().iterator();
+				while (entries.hasNext()) {
+					Entry<String, String> entry = entries.next();
+					jsonObject.put(entry.getKey(), entry.getValue());
+				}
+				String fileName = "LineNo.json";
+				jsonFileUtil.createWorkshopNoJsonFile(jsonObject.toString(), fileName);
+			}
+		} catch (Exception e) {
+			System.out.println("Error opening session");
+			logger.error("取得线体異常,原因" + e);
+			dispose();
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
+		} finally {
+			ErrorContext.instance().reset();
+		}
+		System.out.println(jsonObject);
+		return jsonObject;
+	}
+
+	public Object[] getLineno(String selectWorkshopNo) {// TODO
+		String linenoList;
+		Object[] a = null;
+		Object[] s = null;
+		ArrayList<Object> list = new ArrayList<Object>();
+		System.out.println(selectWorkshopNo);
+		if (!(selectWorkshopNo == null || selectWorkshopNo.equals("") || selectWorkshopNo.equals("--請選擇車間--"))) {
+			if (!(LineNoObject == null || LineNoObject.equals(""))) {
+				linenoList = LineNoObject.getString(selectWorkshopNo);
+				System.out.println(linenoList);
+				if (!(linenoList == null || linenoList.equals(""))) {
+					s = linenoList.split(",");
+					int con = s.length;
+					for (int i = 0; i < con; i++) {
+						String str;
+						str = s[i].toString().trim();
+						if (!(str == null || str.equals("") || str == "0" || str.equals("0"))) {
+							list.add(s[i]);
+						}
+					}
+					int lcon = list.size();
+					System.out.println(lcon);
+					if (lcon > 0) {
+						a = new Object[lcon + 2];
+						a[0] = "請選擇線號";
+						a[1] = "不需要選擇線號";
+						for (int i = 0; i < lcon; i++) {
+							a[i + 2] = list.get(i);
+							System.out.println(list.get(i).toString());
+						}
+					}
+				}
+			}
+		}
+		return a;
 	}
 
 	public Object[] getWorkshopNo() {// TODO
@@ -237,7 +348,7 @@ public class SwipeCardLogin extends JFrame {
 				a = new Object[con + 1];
 				a[0] = "--請選擇車間--";
 				for (int i = 1; i < con + 1; i++) {
-					a[i] = workshopNoInfo.get(i - 1 ).getWorkShopNo();
+					a[i] = workshopNoInfo.get(i - 1).getWorkShopNo();
 					JSONObject workshopNoJson = new JSONObject();
 					workshopNoJson.put("workshopNo", a[i].toString());
 					workshopNoArray.put(workshopNoJson);
@@ -249,7 +360,7 @@ public class SwipeCardLogin extends JFrame {
 				a[0] = "--請選擇車間--";
 			}
 		} catch (Exception e) {
-			logger.error("取得車間異常,原因"+e);
+			logger.error("取得車間異常,原因" + e);
 			dispose();
 			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
@@ -278,7 +389,7 @@ public class SwipeCardLogin extends JFrame {
 				a[0] = "";
 			}
 		} catch (Exception e) {
-			logger.error("取得管理員卡號異常，原因:"+e);
+			logger.error("取得管理員卡號異常，原因:" + e);
 			dispose();
 			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
@@ -309,8 +420,6 @@ public class SwipeCardLogin extends JFrame {
 		}
 	}
 }
-
-
 
 class TextFrame_jButton1_actionAdapter implements ActionListener {
 	private SwipeCardLogin adaptee;
@@ -364,41 +473,98 @@ class TextFrame_jButton1_actionAdapter implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try {
-			char[] pass = adaptee.text1.getPassword();
-			String CardID = new String(pass);
-			System.out.println("CardID: " + CardID);
-			String pattern = "^[0-9]\\d{9}$";
-			Pattern r = Pattern.compile(pattern, Pattern.DOTALL);
-			Matcher m = r.matcher(CardID);
-			// String WorkshopNo = SwipeCardLogin.jtf1.getText();
-			String selectWorkShopNo = adaptee.comboBox1.getSelectedItem().toString();
-			if (selectWorkShopNo.equals("--請選擇車間--")) {
-				JOptionPane.showMessageDialog(adaptee, "請選擇車間!");
-			} else {
-				if (m.matches() == true) {
-					Object[] a = adaptee.LineLeader;
-					/*
-					 * if(ShiftName.equals("日班")){ Shift="D"; }else
-					 * if(ShiftName.equals("夜班")){ Shift="N"; }
-					 */
-					if (isHave(a, CardID)) {// 调用自己定义的函数isHave，如果包含则返回true,否则返回false
-						System.out.println("成功登陸！");
-						JsonFileUtil jsonFileUtil = new JsonFileUtil();
-						String fileName = "saveSelectWorkshopNo.json";
-						JSONObject selectWorkshopNoJson = new JSONObject();
-						selectWorkshopNoJson.put("workshopNo", selectWorkShopNo);
-						jsonFileUtil.saveSelectWorkshopNo(selectWorkshopNoJson.toString(), fileName);
-						adaptee.dispose();
-						SwipeCard swipe = new SwipeCard(selectWorkShopNo);
-						// System.out.println("WorkShopNo: " +
-						// selectWorkShopNo);
-					} else {
-						JOptionPane.showMessageDialog(adaptee, "此卡無管理員權限");
-						System.out.println("此管理员不存在");// 打印结果
-					}
+			if (adaptee.defaultWorkshopNo == null || adaptee.defaultWorkshopNo.equals("")) {
+				char[] pass = adaptee.text1.getPassword();
+				String CardID = new String(pass);
+				System.out.println("CardID: " + CardID);
+				String pattern = "^[0-9]\\d{9}$";
+				Pattern r = Pattern.compile(pattern, Pattern.DOTALL);
+				Matcher m = r.matcher(CardID);
+				// String WorkshopNo = SwipeCardLogin.jtf1.getText();
+				String selectWorkShopNo = adaptee.comboBox1.getSelectedItem().toString();
+				String selectLineNo = adaptee.comboBox2.getSelectedItem().toString();
+				if (selectWorkShopNo.equals("--請選擇車間--")) {
+					JOptionPane.showMessageDialog(adaptee, "請選擇車間!");
 				} else {
-					JOptionPane.showMessageDialog(adaptee, "不合法卡號");
-					System.out.println("不合法卡號，含有非數字字符或卡號長度不正確");
+					if(selectLineNo.equals("請選擇線號")){
+						JOptionPane.showMessageDialog(adaptee, "請選擇線號!");
+					}else{
+						if(selectLineNo == "不需要選擇線號"){
+							selectLineNo = null;
+						}
+					if (m.matches() == true) {
+						Object[] a = adaptee.LineLeader;
+						/*
+						 * if(ShiftName.equals("日班")){ Shift="D"; }else
+						 * if(ShiftName.equals("夜班")){ Shift="N"; }
+						 */
+						if (isHave(a, CardID)) {// 调用自己定义的函数isHave，如果包含则返回true,否则返回false
+							System.out.println("成功登陸！");
+							JsonFileUtil jsonFileUtil = new JsonFileUtil();
+							String fileName = "saveSelectWorkshopNo.json";
+							JSONObject selectWorkshopNoJson = new JSONObject();
+							selectWorkshopNoJson.put("workshopNo", selectWorkShopNo);
+							jsonFileUtil.saveSelectWorkshopNo(selectWorkshopNoJson.toString(), fileName);
+							
+							String lfileName = "saveLineNo.json";
+							if(selectLineNo != null){
+								JSONObject selectLineNoJson = new JSONObject();
+								selectLineNoJson.put("lineNo", selectLineNo);
+								jsonFileUtil.saveSelectWorkshopNo(selectLineNoJson.toString(), lfileName);
+							}else{
+								jsonFileUtil.deleteSaveLineNo(lfileName);
+							}
+							adaptee.dispose();
+							SwipeCard swipe = new SwipeCard(selectWorkShopNo,selectLineNo);
+							// System.out.println("WorkShopNo: " +
+							// selectWorkShopNo);
+						} else {
+							JOptionPane.showMessageDialog(adaptee, "此卡無管理員權限");
+							System.out.println("此管理员不存在");// 打印结果
+						}
+					} else {
+						JOptionPane.showMessageDialog(adaptee, "不合法卡號");
+						System.out.println("不合法卡號，含有非數字字符或卡號長度不正確");
+					}
+					}
+				}
+			}else{
+				String selectWorkShopNo = adaptee.comboBox1.getSelectedItem().toString();
+				String selectLineNo = adaptee.comboBox2.getSelectedItem().toString();
+				if (selectWorkShopNo.equals("--請選擇車間--")) {
+					JOptionPane.showMessageDialog(adaptee, "請選擇車間!");
+				} else {
+					if(selectLineNo.equals("請選擇線號")){
+						JOptionPane.showMessageDialog(adaptee, "請選擇線號!");
+					}else{
+						if(selectLineNo == "不需要選擇線號"){
+							selectLineNo = null;
+						}
+					
+						/*
+						 * if(ShiftName.equals("日班")){ Shift="D"; }else
+						 * if(ShiftName.equals("夜班")){ Shift="N"; }
+						 */
+							System.out.println("成功登陸！");
+							JsonFileUtil jsonFileUtil = new JsonFileUtil();
+							String fileName = "saveSelectWorkshopNo.json";
+							JSONObject selectWorkshopNoJson = new JSONObject();
+							selectWorkshopNoJson.put("workshopNo", selectWorkShopNo);
+							jsonFileUtil.saveSelectWorkshopNo(selectWorkshopNoJson.toString(), fileName);
+							
+							String lfileName = "saveLineNo.json";
+							if(selectLineNo != null){
+								JSONObject selectLineNoJson = new JSONObject();
+								selectLineNoJson.put("lineNo", selectLineNo);
+								jsonFileUtil.saveSelectWorkshopNo(selectLineNoJson.toString(), lfileName);
+							}else{
+								jsonFileUtil.deleteSaveLineNo(lfileName);
+							}
+							adaptee.dispose();
+							SwipeCard swipe = new SwipeCard(selectWorkShopNo,selectLineNo);
+							// System.out.println("WorkShopNo: " +
+							// selectWorkShopNo);
+					}
 				}
 			}
 		} catch (JSONException e1) {

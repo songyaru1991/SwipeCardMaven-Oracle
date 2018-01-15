@@ -278,6 +278,10 @@
 		    and ID is null
 		</if>
     </update>
+    
+    <select id="selectLineNoList" resultType="LineNO">
+    	SELECT distinct workshopno,lineno from lineno
+    </select>
    
 </mapper>  
 

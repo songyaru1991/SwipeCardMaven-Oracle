@@ -55,6 +55,7 @@ public class SwipeCardNoDB extends JFrame {
 	private String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	private String time;
 	private int ONE_SECOND = 1000;
+	static JsonFileUtil jsonFileUtil = new JsonFileUtil();
 
 	static JTabbedPane tabbedPane;
 	static JLabel label1, label3, swipeTimeLable, curTimeLable;
@@ -104,7 +105,7 @@ public class SwipeCardNoDB extends JFrame {
 						SwipeRecordLogToDB logToDB=new SwipeRecordLogToDB();
 						logToDB.SwipeRecordLogToDB();
 						dispose();
-						SwipeCard swipe = new SwipeCard(selectWorkShopNo);
+						SwipeCard swipe = new SwipeCard(selectWorkShopNo,null);
 					    this.cancel();
 					}
 					
@@ -122,6 +123,9 @@ public class SwipeCardNoDB extends JFrame {
 
 		super("產線端刷卡無DB模式"+CurrentVersion);
 		//setBounds(12, 84, 1000, 630);		
+		if(workshopNoWithDB == "" || workshopNoWithDB.equals("")){
+			workshopNoWithDB = jsonFileUtil.getSaveWorkshopNo();
+		}
 
 		Container c = getContentPane();
 		tabbedPane = new JTabbedPane(JTabbedPane.LEFT); // 创建选项卡面板对象

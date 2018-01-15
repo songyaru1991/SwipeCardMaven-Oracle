@@ -283,5 +283,15 @@ public class JsonFileUtil {
 		return selectWorkshopNo;
 	}
 	
+	public void deleteSaveLineNo(String lfileName) {
+		// TODO Auto-generated method stub
+		String filePath = "D:/swipeCard/logs/";
+		String LineNoSavePath = filePath + lfileName;
+		File file = new File(LineNoSavePath);
+		if(file.exists()){
+			file.delete();
+		}
+	}
+	
 
 }
