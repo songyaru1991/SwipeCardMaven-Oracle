@@ -260,10 +260,10 @@ public class SwipeCard extends JFrame {
 		labelT1_3.setBounds(x1 + 20, 2 * y1 + 20, x7, y1);
 
 		labelT1_6.setBounds(x1, 8 * y1, x7, y1);
-		linenoLabel.setBounds(x1 + x7, 4 * y1 + 50, y4 + 100, y1);
+		linenoLabel.setBounds(x1 + x7, 4 * y1 + 80, y4 + 100, y1);
 		workShopNoJlabel.setBounds(x1 + x7, 1 * y1, y4 + 100, y1);
 		textT1_3.setBounds(x1 + x7, 2 * y1 + 20, y4 + 100, y1);
-		labelT1_4.setBounds(x1 + 20, 4 * y1 + 50, x7, y1);
+		labelT1_4.setBounds(x1 + 20, 4 * y1 + 80, x7, y1);
 		jtextT1_2.setBounds(x1 + x7, 9 * y1, x4, y1);
 
 		textT2_1.setBounds(x1 + x7, 1 * y1, y4, y1);

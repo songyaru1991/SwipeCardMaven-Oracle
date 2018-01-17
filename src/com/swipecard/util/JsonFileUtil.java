@@ -344,5 +344,54 @@ public class JsonFileUtil {
 		}
 	}
 	
+	public JSONObject getLineNoByJson() {
+		String filePath = "D:/swipeCard/logs/";
+		String fileName = "LineNo.json";
+		String LineNoSavePath = filePath + fileName;
+		File file = new File(LineNoSavePath);
+		JSONObject a = new JSONObject();
+		BufferedReader brRread = null;
+		String lineNoStr = "";
+		try {
+			if (!file.exists()) {
+				a = null;
+			} else {
+				InputStreamReader streamReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
+				 brRread = new BufferedReader(streamReader);
+			//	brRread = new BufferedReader(new FileReader(workshopNoSavePath));
+				String tempString = null;
+				while ((tempString = brRread.readLine()) != null) {
+					lineNoStr += tempString;
+				}
+				a = new JSONObject(lineNoStr);
+				brRread.close();
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			logger.error("getLineNoByJson時 Error building SqlSession，原因:"+e);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error("getLineNoByJson時 Error building SqlSession，原因:"+e);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.error("getLineNoByJson時 Error building SqlSession，原因:"+e);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			e.printStackTrace();
+		} finally {
+			if (brRread != null) {
+				try {
+					brRread.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return a;
+	}
+	
 
 }

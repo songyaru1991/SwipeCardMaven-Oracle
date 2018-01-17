@@ -320,7 +320,7 @@ public class SwipeCardLogin extends JFrame {
 					for (int i = 0; i < con; i++) {
 						String str;
 						str = s[i].toString().trim();
-						if (!(str == null || str.equals("") || str == "0" || str.equals("0") || str.equals("null"))) {
+						if (!(str == null || str.equals("") || str.equals("null"))) {
 							list.add(s[i]);
 						}
 					}
