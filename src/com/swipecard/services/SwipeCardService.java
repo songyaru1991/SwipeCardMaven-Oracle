@@ -1,10 +1,15 @@
 package com.swipecard.services;
 
 import java.awt.Color;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -188,8 +193,8 @@ public class SwipeCardService {
 			}
 			synchronized (this) {	
 				GetLocalHostIpAndName hostIP=new GetLocalHostIpAndName();
-				String swipeCardHostIp=hostIP.getLocalHostIP();
-			
+				String swipeCardHostIp=hostIP.getLocalIp();
+				
 				RawRecord swipeRecord=new RawRecord();
 				swipeRecord.setCardID(CardID);
 				swipeRecord.setId(Id);
@@ -306,7 +311,7 @@ public class SwipeCardService {
 	}
 	
 	/*原outWorkNSwipeCard*/
-	public SwingBase offDutyNightShiftSwipeCard(SqlSession session,String RCNO,String PrimaryItemNo,String workShop,Employee employee, Date swipeCardTime, EmpShiftInfos empYesShift) {
+	public SwingBase offDutyNightShiftSwipeCard(SqlSession session,String RCNO,String PrimaryItemNo,String workShop,Employee employee, Date swipeCardTime, EmpShiftInfos empYesShift, String PROD_LINE_CODE) {
 		SwipeCardTimeInfos userNSwipe = new SwipeCardTimeInfos();
 		Date SwipeCardTime2 = swipeCardTime;
 		SwingBase fieldSetting=new SwingBase();
@@ -319,6 +324,7 @@ public class SwipeCardService {
 			userNSwipe.setShift(empYesShift.getShift());
 			userNSwipe.setCLASS_NO(empYesShift.getClass_no());
 			userNSwipe.setWorkshopNo(workShop);
+			userNSwipe.setProdLineCode(PROD_LINE_CODE);
 			
 			int yesterdatOnDutyCardCount=session.selectOne("selectCountNByCardID",userNSwipe);
 			
@@ -363,6 +369,10 @@ public class SwipeCardService {
 								+ FormatDateUtil.changeTimeToStr(swipeCardTime) + "\n"
 								+"\n昨日班別為:"+empYesShift.getClass_desc()
 								+ "\n員工下班刷卡成功！\n------------\n");
+							synchronized (this) {
+								session.insert("insertOutWorkSwipeTime", userNSwipe);
+							}
+							session.commit();
 						}
 						else {
 							fieldSetting.setFieldColor(Color.RED);
@@ -446,7 +456,7 @@ public class SwipeCardService {
 	}
 
 	/*原goWorkSwipeCard*/
-	public SwingBase onDutyDaySwipeCard(SqlSession session, Employee employee, Date swipeCardTime,EmpShiftInfos empCurShift,String RCNO,String PrimaryItemNo,String workShopNo) {
+	public SwingBase onDutyDaySwipeCard(SqlSession session, Employee employee, Date swipeCardTime,EmpShiftInfos empCurShift,String RCNO,String PrimaryItemNo,String workShopNo, String PROD_LINE_CODE) {
 		SwingBase fieldSetting=new SwingBase();
 		try {
 			String curDate=FormatDateUtil.getCurDate();
@@ -484,6 +494,7 @@ public class SwipeCardService {
 					userSwipe.setWorkshopNo(workShopNo);
 					userSwipe.setShift(empCurShift.getShift());
 					userSwipe.setCLASS_NO(empCurShift.getClass_no());
+					userSwipe.setProdLineCode(PROD_LINE_CODE);
 					session.insert("insertUserByOnDNShift", userSwipe);
 					session.commit();
 				}
@@ -498,7 +509,7 @@ public class SwipeCardService {
 
 	/*goOrOutWorkSwipeRecord*/
 	public SwingBase onDutyOrOffDutySwipeRecord(SqlSession session, Employee employee, Date swipeCardTime,
-			EmpShiftInfos empCurShift,String workShopNo,String RCNO,String PrimaryItemNo) {
+			EmpShiftInfos empCurShift,String workShopNo,String RCNO,String PrimaryItemNo,String PROD_LINE_CODE) {
 		SwipeCardTimeInfos userSwipe = new SwipeCardTimeInfos();	
 		SwingBase fieldSetting=new SwingBase();
 		try {
@@ -512,7 +523,7 @@ public class SwipeCardService {
 			// 無刷卡記錄
 			if (curOnDutyCardCount == 0) {
 					
-				fieldSetting=onDutyDaySwipeCard(session, employee, swipeCardTime, empCurShift,RCNO,PrimaryItemNo,workShopNo);
+				fieldSetting=onDutyDaySwipeCard(session, employee, swipeCardTime, empCurShift,RCNO,PrimaryItemNo,workShopNo,PROD_LINE_CODE);
 
 			} else if (curOnDutyCardCount > 0) {
 
@@ -533,7 +544,7 @@ public class SwipeCardService {
 		return fieldSetting;
 	}
 	
-	public SwingBase swipeCardRecord(SqlSession session, Employee employee, Date swipeCardTime,String RCNO,String PrimaryItemNo,String workShopNo) {
+	public SwingBase swipeCardRecord(SqlSession session, Employee employee, Date swipeCardTime,String RCNO,String PrimaryItemNo,String workShopNo,String PROD_LINE_CODE) {
 		SwingBase fieldSetting=new SwingBase(); 
 		EmpShiftInfos curShiftUser = new EmpShiftInfos();
 		try {
@@ -571,6 +582,7 @@ public class SwipeCardService {
 				userSwipe.setWorkshopNo(workShopNo);
 				userSwipe.setRC_NO(RCNO);
 				userSwipe.setPRIMARY_ITEM_NO(PrimaryItemNo);
+				userSwipe.setProdLineCode(PROD_LINE_CODE);
 				
 				if(goWorkSwipeTime.after(oneHBeforClassStart) && goWorkSwipeTime.before(empCurShift.getClass_start())) {
 					int isOnDutySwipeDuplicate =  session.selectOne("isGoWorkSwipeDuplicate", userSwipe);
@@ -578,7 +590,7 @@ public class SwipeCardService {
 						fieldSetting=this.onDutySwipeDuplicate(session, employee, SwipeCardTime2, empCurShift.getShift());
 					}
 					else {
-						fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo);
+						fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo,PROD_LINE_CODE);
 					}
 				}
 				else {
@@ -624,14 +636,14 @@ public class SwipeCardService {
 								}
 							}
 							else {
-								fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo);
+								fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo,PROD_LINE_CODE);
 							}
 						/*	
 						 *break;
 						case "N":*/
 					} else if (empCurShift.getShift().equals("N")){
 							if(goWorkSwipeTime.getHours() > 12) {
-								fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo);
+								fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo,PROD_LINE_CODE);
 							}
 							else if(goWorkSwipeTime.getHours()<=12) {
 								fieldSetting.setFieldColor(Color.RED);
@@ -659,6 +671,34 @@ public class SwipeCardService {
 			logger.error("swipeCardRecord exception",ex);
 		}
 		return fieldSetting;
+	}
+	
+	public String getLocalIp() {
+		// TODO Auto-generated method stub
+				Enumeration allNetInterfaces = null;
+				try {
+					allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+				} catch (SocketException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				InetAddress ip = null;
+				String ipv4 = "";
+				while (allNetInterfaces.hasMoreElements()) {
+					NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+//					System.out.println(netInterface.getName());
+					Enumeration addresses = netInterface.getInetAddresses();
+					while (addresses.hasMoreElements()) {
+						ip = (InetAddress) addresses.nextElement();
+						if (ip != null && ip instanceof Inet4Address) {
+							if(ip.getHostAddress().equals("127.0.0.1")){  
+		                        continue;  
+		                    }
+							ipv4 += ip.getHostAddress()+"/";
+						}
+					}
+				}
+				return ipv4;
 	}
 
 }

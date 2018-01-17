@@ -283,6 +283,57 @@ public class JsonFileUtil {
 		return selectWorkshopNo;
 	}
 	
+	public String getSaveLineNo() {
+		String filePath = "D:/swipeCard/logs/";
+		String fileName = "saveLineNo.json";
+		String saveLineNoPath = filePath + fileName;
+		File file = new File(saveLineNoPath);
+
+		BufferedReader brRread = null;
+		String selectLineNo = "";
+		try {
+			//如果文件不存在
+			if (!file.exists()) {
+				selectLineNo=null;
+			} else {
+				InputStreamReader streamReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
+				 brRread = new BufferedReader(streamReader);
+			//	brRread = new BufferedReader(new FileReader(workshopNoSavePath));
+				String tempString = null;
+				while ((tempString = brRread.readLine()) != null) {
+					selectLineNo += tempString;
+				}
+				JSONObject workshopNoJson  = new JSONObject(selectLineNo);						
+	
+				selectLineNo = workshopNoJson.get("lineNo").toString();
+
+				brRread.close();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error("getSaveLineNo時 Error building SqlSession，原因:"+e);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.error("getSaveLineNo時 Error building SqlSession，原因:"+e);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			e.printStackTrace();
+		} finally {
+			if (brRread != null) {
+				try {
+					brRread.close();
+				} catch (IOException e) {
+					logger.error("getSaveLineNo時 Error building SqlSession，原因:"+e);
+					// e.printStackTrace();
+					SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+					e.printStackTrace();
+				}
+			}
+		}
+		return selectLineNo;
+	}
+	
 	public void deleteSaveLineNo(String lfileName) {
 		// TODO Auto-generated method stub
 		String filePath = "D:/swipeCard/logs/";

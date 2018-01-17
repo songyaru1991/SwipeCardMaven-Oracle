@@ -54,6 +54,7 @@ import org.apache.log4j.Logger;
 
 import com.swipecard.util.FormatDateUtil;
 import com.swipecard.util.FrameShowUtil;
+import com.swipecard.util.GetLocalHostIpAndName;
 import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.SwipeCardJButton;
 import com.swipecard.model.EmpShiftInfos;
@@ -81,11 +82,11 @@ public class SwipeCard extends JFrame {
 	static JLabel labelS1, labelS2, labelS3;
 	static JPanel panel1, panel2, panel3;
 	static ImageIcon image;
-	static JLabel labelT2_1, labelT2_2, labelT2_3, labelT1_1,workShopNoJlabel, labelT1_3, labelT1_5, labelT1_6;
+	static JLabel labelT2_1, labelT2_2, labelT2_3, labelT1_1,workShopNoJlabel, labelT1_3, labelT1_5, labelT1_6, labelT1_4, linenoLabel, labelT1_7;
 	static JComboBox comboBox, comboBox2;
 	static SwipeCardJButton butT1_3, butT1_4, butT1_5, butT1_6, butT2_1, butT2_2, butT2_3, butT1_7, butT2_rcno;
 	static JTextArea jtextT1_1, jtextT1_2;
-	static TextField textT2_1, textT2_2, textT1_3, textT1_1, textT1_5;
+	static TextField textT2_1, textT2_2, textT1_3, textT1_1, textT1_5, textT1_6;
 	static JTextField jtf, jtf2;
 	static JScrollPane jspT1_1, jspT2_2, JspTable, myScrollPane;
 	// static Object[] str1 = getItems();
@@ -95,6 +96,7 @@ public class SwipeCard extends JFrame {
 
 	 static JsonFileUtil jsonFileUtil = new JsonFileUtil();
 	  static String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
+	  static  String defaultLineNo = jsonFileUtil.getSaveLineNo();
 	
 	static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
@@ -133,7 +135,7 @@ public class SwipeCard extends JFrame {
 		}
 	}
 
-	public SwipeCard(final String WorkshopNo, String selectLineNo) {
+	public SwipeCard(final String WorkshopNo, String LineNo) {
 
 		super("產線端刷卡程式-"+CurrentVersion);
 		SwipeCardService service=new SwipeCardService();
@@ -196,16 +198,25 @@ public class SwipeCard extends JFrame {
 		labelT1_1.setFont(new Font("微软雅黑", Font.BOLD, 25));
 		
 		workShopNoJlabel = new JLabel("車間:");
-		workShopNoJlabel.setFont(new Font("微软雅黑", Font.BOLD, 25));		
+		workShopNoJlabel.setFont(new Font("微软雅黑", Font.BOLD, 25));
+		
+		linenoLabel = new JLabel("線號");
+		linenoLabel.setFont(new Font("微软雅黑", Font.BOLD, 25));
 
 		labelT1_3 = new JLabel("刷卡:");
 		labelT1_3.setFont(new Font("微软雅黑", Font.BOLD, 25));
+		
+		labelT1_4 = new JLabel("線號：");
+		labelT1_4.setFont(new Font("微软雅黑", Font.BOLD, 25));
 
 		labelT1_5 = new JLabel("實際人數:");
 		labelT1_6 = new JLabel("備註:");
 		labelT2_2 = new JLabel("指示單號:");
 		labelT2_3 = new JLabel("標準人數:");
-
+		labelT1_7 = new JLabel("更換車間刷卡：");
+		labelT1_7.setFont(new Font("微软雅黑", Font.BOLD, 25));
+		labelT1_7.setVisible(false);
+		
 		curTimeLable = new JLabel();
 		curTimeLable.setFont(new Font("微软雅黑", Font.BOLD, 35));
 
@@ -249,10 +260,10 @@ public class SwipeCard extends JFrame {
 		labelT1_3.setBounds(x1 + 20, 2 * y1 + 20, x7, y1);
 
 		labelT1_6.setBounds(x1, 8 * y1, x7, y1);
-
+		linenoLabel.setBounds(x1 + x7, 4 * y1 + 50, y4 + 100, y1);
 		workShopNoJlabel.setBounds(x1 + x7, 1 * y1, y4 + 100, y1);
 		textT1_3.setBounds(x1 + x7, 2 * y1 + 20, y4 + 100, y1);
-
+		labelT1_4.setBounds(x1 + 20, 4 * y1 + 50, x7, y1);
 		jtextT1_2.setBounds(x1 + x7, 9 * y1, x4, y1);
 
 		textT2_1.setBounds(x1 + x7, 1 * y1, y4, y1);
@@ -278,12 +289,6 @@ public class SwipeCard extends JFrame {
 
 		textT1_1.setEditable(false);
 		textT1_3.setEditable(true);
-		// 使用swing的线程做獲取焦點的界面绘制，避免获取不到的情况。
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				textT1_3.requestFocusInWindow();
-			}
-		});
 
 		jtextT1_1.setEditable(false);
 		jtextT1_2.setEditable(false);
@@ -295,8 +300,9 @@ public class SwipeCard extends JFrame {
 		jtextT1_2.setLineWrap(true);
 
 		jtextT1_2.setBackground(d);
+		labelT1_7.setBounds(x1 + 20, 350 + y1 + 20, x3, y1);
 
-		butT1_5 = new SwipeCardJButton("登出(切換帳號)", 2);
+		butT1_5 = new SwipeCardJButton("更換車間", 2);
 		butT1_6 = new SwipeCardJButton("退出程式", 2);
 
 		butT2_1 = new SwipeCardJButton("換料 ", 2);
@@ -311,11 +317,20 @@ public class SwipeCard extends JFrame {
 
 		butT2_rcno.setBounds(x2, 3 * y1 + 30, 100, y1);
 		butT2_2.setBounds(x2 + 110, 3 * y1 + 30, 90, y1);
+		
+		textT1_6 = new TextField(15);// 管理员刷卡
+		textT1_6.setFont(new Font("微软雅黑", Font.PLAIN, 25));
+		textT1_6.setVisible(false);
+		textT1_6.setBounds(x1 + x3, 350 + y1 + 20, y4 + 30, y1);
+		textT1_6.setEditable(false);
+		panel1.add(textT1_6);
 
 		panel1.add(textT1_3);
-
+		panel1.add(labelT1_7);
 		panel1.add(labelT1_1);
 		panel1.add(workShopNoJlabel);
+		panel1.add(labelT1_4);
+		panel1.add(linenoLabel);
 		
 		panel1.add(labelT1_3);
 		panel1.add(swipeTimeLable);
@@ -336,6 +351,13 @@ public class SwipeCard extends JFrame {
 		panel2.add(comboBox2);
 
 		panel2.add(myScrollPane);
+		
+		if(LineNo == null || LineNo.equals("")){
+			linenoLabel.setText("");
+			labelT1_4.setVisible(false);
+		}else{
+			linenoLabel.setText(LineNo);
+		}
 		
 		FrameShowUtil frameShow=new FrameShowUtil();
 		frameShow.sizeWindowOnScreen(this, 0.51, 0.6);
@@ -414,9 +436,73 @@ public class SwipeCard extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				InitGlobalFont(new Font("微软雅黑", Font.BOLD, 18));
-				dispose();
-				SwipeCardLogin d = new SwipeCardLogin();
+				String bt = butT1_5.getText();
+				if (bt.equals("更換車間")) {
+					butT1_5.setText("刷卡上下班");
+					jtextT1_1.setText("請管理員刷卡");
+					jtextT1_1.setBackground(Color.WHITE);
+					textT1_3.setEditable(false);
+					textT1_6.setEditable(true);
+					textT1_6.setVisible(true);
+					labelT1_7.setVisible(true);
+					// 使用swing的线程做獲取焦點的界面绘制，避免获取不到的情况。
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							textT1_6.requestFocusInWindow();
+						}
+					});
+				} else {
+					butT1_5.setText("更換車間");
+					jtextT1_1.setText("刷卡上下班");
+					jtextT1_1.setBackground(Color.WHITE);
+					textT1_3.setEditable(true);
+					textT1_6.setEditable(false);
+					textT1_6.setVisible(false);
+					labelT1_7.setVisible(false);
+					// 使用swing的线程做獲取焦點的界面绘制，避免获取不到的情况。
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							textT1_3.requestFocusInWindow();
+						}
+					});
+				}
+			}
+		});
+		
+		/*
+		 * l 刷管理员的卡选择车间
+		 */
+		textT1_6.addTextListener(new TextListener() {
+
+			@Override
+			public void textValueChanged(TextEvent e) {
+				SqlSession session = sqlSessionFactory.openSession();
+				// TODO Auto-generated method stub
+				String cardID = textT1_6.getText();
+				if (cardID.length() > 10) {
+					jtextT1_1.setBackground(Color.RED);
+					jtextT1_1.setText("卡號輸入有誤，請再次刷卡\n");
+					textT1_6.setText("");
+				} else {
+					String pattern = "^[0-9]\\d{9}$";
+					Pattern r = Pattern.compile(pattern, Pattern.DOTALL);
+					Matcher m = r.matcher(cardID);
+					if (m.matches() == true) {
+						boolean admin = IsAdminByCardID(cardID, session);
+						if (admin) {
+							dispose();
+							SwipeCardLogin swipeCardLogin = new SwipeCardLogin();
+							textT1_6.setText("");
+						} else {
+							jtextT1_1.setBackground(Color.RED);
+							jtextT1_1.setText("您的卡权限不够\n请刷管理员的卡");
+							textT1_6.setText("");
+						}
+					} else {
+						System.out.println("無輸入內容或輸入錯誤!");
+					}
+				}
+
 			}
 		});
 
@@ -539,10 +625,24 @@ public class SwipeCard extends JFrame {
 		});
 
 		// TODO 刷卡模式
-		textT1_3.addTextListener(new TextListener() {
-
+		textT1_3.addKeyListener(new KeyListener() {
+			
 			@Override
-			public void textValueChanged(TextEvent e) {
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+				if(e.getKeyChar() == KeyEvent.VK_ENTER){
 				SqlSession session = sqlSessionFactory.openSession();
 				SwipeCardService swipeCardService=new SwipeCardService();
 				String CardID = textT1_3.getText();
@@ -558,7 +658,11 @@ public class SwipeCard extends JFrame {
 					jtextT1_1.setBackground(Color.red);
 					jtextT1_1.setText("卡號輸入有誤，請再次刷卡\n");
 					textT1_3.setText("");
-				} else {
+				} else if(CardID.length()<10){
+					jtextT1_1.setBackground(Color.RED);
+					jtextT1_1.setText("卡號輸入有誤，請再次刷卡\n");
+					textT1_3.setText("");
+				}else {
 					String pattern = "^[0-9]\\d{9}$";
 					Pattern r = Pattern.compile(pattern, Pattern.DOTALL);
 					Matcher m = r.matcher(CardID);
@@ -605,6 +709,7 @@ public class SwipeCard extends JFrame {
 								String RC_NO = jtf.getText();
 								String PRIMARY_ITEM_NO = textT2_1.getText();
 								String Id = eif.getId();						
+								String PROD_LINE_CODE = linenoLabel.getText();
 								//判斷該卡號是否已連續工作六天
 								WorkedOneWeek workedOneWeek=swipeCardService.isUserContinuesWorkedOneWeek(session, eif, CardID, WorkshopNo, swipeCardTime);
 								if(!workedOneWeek.isWorkedOneWeek()){					
@@ -628,7 +733,7 @@ public class SwipeCard extends JFrame {
 							
 										yesterdayShift = empYesShift.getShift();
 										if (yesterdayShift.equals("N")) {
-											Timestamp yesClassEnd = empYesShift.getClass_start();
+											Timestamp yesClassEnd = empYesShift.getClass_end();
 											Timestamp goWorkSwipeTime = new Timestamp(new Date().getTime());
 
 											Calendar outWorkc = Calendar.getInstance();
@@ -643,7 +748,7 @@ public class SwipeCard extends JFrame {
 											if (empCurShiftCount == 0) {
 												if (goWorkSwipeTime.before(afterClassEnd)) {
 													// 刷卡在夜班下班3.5小時之內,記為昨日夜班下刷
-													fieldSetting=swipeCardService.offDutyNightShiftSwipeCard(session, RC_NO, PRIMARY_ITEM_NO, WorkshopNo, eif, swipeCardTime, empYesShift);
+													fieldSetting=swipeCardService.offDutyNightShiftSwipeCard(session, RC_NO, PRIMARY_ITEM_NO, WorkshopNo, eif, swipeCardTime, empYesShift,PROD_LINE_CODE);
 													showLabelContent(fieldSetting);
 												}else{
 													// 刷卡在夜班下班3.5小時之后,今日班別有誤
@@ -676,11 +781,11 @@ public class SwipeCard extends JFrame {
 
 												if (curShift.equals("N")) {													
 													if (swipeCardTime.getHours() < 12) {
-														fieldSetting=swipeCardService.offDutyNightShiftSwipeCard(session, RC_NO, PRIMARY_ITEM_NO, WorkshopNo, eif, SwipeCardTime2, empYesShift);
+														fieldSetting=swipeCardService.offDutyNightShiftSwipeCard(session, RC_NO, PRIMARY_ITEM_NO, WorkshopNo, eif, SwipeCardTime2, empYesShift,PROD_LINE_CODE);
 														showLabelContent(fieldSetting);
 													} else {
 														// 上班刷卡
-														fieldSetting=swipeCardService.onDutyDaySwipeCard(session, eif, swipeCardTime, empCurShift, RC_NO, PRIMARY_ITEM_NO, WorkshopNo);
+														fieldSetting=swipeCardService.swipeCardRecord(session, eif, swipeCardTime, RC_NO, PRIMARY_ITEM_NO, WorkshopNo,PROD_LINE_CODE);
 														showLabelContent(fieldSetting);
 													}
 												} else {													
@@ -707,7 +812,7 @@ public class SwipeCard extends JFrame {
 															} else {
 																// 刷卡在夜班下班3.5小時之后,記為今日白班上刷
 																
-																fieldSetting=swipeCardService.offDutySwipeDuplicate(session, eif, swipeCardTime, curShift);
+																fieldSetting=swipeCardService.swipeCardRecord(session, eif, swipeCardTime, RC_NO, PRIMARY_ITEM_NO, WorkshopNo,PROD_LINE_CODE);
 																showLabelContent(fieldSetting);
 															}
 														} else {
@@ -718,13 +823,13 @@ public class SwipeCard extends JFrame {
 																fieldSetting=swipeCardService.offDutySwipeDuplicate(session, eif, swipeCardTime, curShift);
 																showLabelContent(fieldSetting);
 															} else {
-																fieldSetting=swipeCardService.swipeCardRecord(session, eif, swipeCardTime, RC_NO, PRIMARY_ITEM_NO, WorkshopNo);
+																fieldSetting=swipeCardService.swipeCardRecord(session, eif, swipeCardTime, RC_NO, PRIMARY_ITEM_NO, WorkshopNo,PROD_LINE_CODE);
 																showLabelContent(fieldSetting);
 															}
 														}
 													} else {													
 														// 昨天夜班，今天白班的，昨日夜班上刷不存在，直接記為今天白班刷卡
-														fieldSetting=swipeCardService.swipeCardRecord(session, eif, swipeCardTime, RC_NO, PRIMARY_ITEM_NO, WorkshopNo);
+														fieldSetting=swipeCardService.swipeCardRecord(session, eif, swipeCardTime, RC_NO, PRIMARY_ITEM_NO, WorkshopNo,PROD_LINE_CODE);
 														showLabelContent(fieldSetting);																								
 													}													
 												}
@@ -732,11 +837,11 @@ public class SwipeCard extends JFrame {
 											}
 											
 										} else {
-											fieldSetting=swipeCardService.swipeCardRecord(session, eif, swipeCardTime, RC_NO, PRIMARY_ITEM_NO, WorkshopNo);
+											fieldSetting=swipeCardService.swipeCardRecord(session, eif, swipeCardTime, RC_NO, PRIMARY_ITEM_NO, WorkshopNo,PROD_LINE_CODE);
 											showLabelContent(fieldSetting);
 										}
 									} else {
-										fieldSetting=swipeCardService.swipeCardRecord(session, eif, swipeCardTime, RC_NO, PRIMARY_ITEM_NO, WorkshopNo);
+										fieldSetting=swipeCardService.swipeCardRecord(session, eif, swipeCardTime, RC_NO, PRIMARY_ITEM_NO, WorkshopNo,PROD_LINE_CODE);
 										showLabelContent(fieldSetting);
 									}
 								}
@@ -768,11 +873,19 @@ public class SwipeCard extends JFrame {
 						System.out.println("無輸入內容或輸入錯誤!");
 					}
 				}
+				}
 			}
 		});
 
 		c.add(tabbedPane);
 		c.setBackground(Color.lightGray);
+		
+		// 使用swing的线程做獲取焦點的界面绘制，避免获取不到的情况。
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				textT1_3.requestFocusInWindow();
+			}
+		});
 
 		//textT1_1.setText(WorkshopNo);// 綁定車間
 		workShopNoJlabel.setText(WorkshopNo);
@@ -811,10 +924,34 @@ public class SwipeCard extends JFrame {
 	}
 	
 	public static void main(String args[]) {
+		boolean OneWindow = OpenOneWindow.checkLock();
+		if (OneWindow) {
 		InitGlobalFont(new Font("微软雅黑", Font.BOLD, 18));
-		String WorkShopNo = "FD1Q3F1";
-		// JLabelA d = new JLabelA(WorkShopNo, LineNo);
-		SwipeCard d = new SwipeCard(WorkShopNo,null);
+		SwipeCardService swipeCardService = new SwipeCardService();
+		String WorkShopNo = null;
+		String LineNo =null;
+		if(defaultLineNo != null){
+			LineNo = defaultLineNo;
+		}
+		if (defaultWorkshopNo != null) {
+			WorkShopNo = defaultWorkshopNo;
+			SwipeCard d = new SwipeCard(WorkShopNo,LineNo);
+		} else {
+			SwipeCardLogin d = new SwipeCardLogin();
+		}
+		//檢測ip是否可用
+		String ip = GetLocalHostIpAndName.getLocalIp();
+		CheckIp checkIp = new CheckIp(ip);
+		Thread executeCheckIp = new Thread(checkIp);
+		executeCheckIp.start();
+		//检测版本是否最新
+		/*CheckCurrentVersion chkVersion = new CheckCurrentVersion(CurrentVersion);
+		Thread executeCheckVersion = new Thread(chkVersion);
+		executeCheckVersion.start();*/
+		} else {
+			JOptionPane.showConfirmDialog(null, "程序已經開啟，請不要重複開啟", "程序重複打開", JOptionPane.DEFAULT_OPTION);
+			System.exit(0);
+		}
 	}
 
 	public void update() {
@@ -885,6 +1022,24 @@ public class SwipeCard extends JFrame {
 				session.close();
 			}
 		}
+	}
+	
+	protected boolean IsAdminByCardID(String cardID, SqlSession session) {
+		// TODO Auto-generated method stub
+		try {
+
+			int isAdmin = session.selectOne("isAdminByCardID", cardID);
+			if (isAdmin > 0) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception e) {
+			logger.error("判断是否管理员错误，原因：" + e);
+			dispose();
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+		}
+		return false;
 	}
 
 }

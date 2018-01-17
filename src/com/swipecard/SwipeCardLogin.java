@@ -281,7 +281,12 @@ public class SwipeCardLogin extends JFrame {
 				Iterator<Entry<String, String>> entries = map.entrySet().iterator();
 				while (entries.hasNext()) {
 					Entry<String, String> entry = entries.next();
-					jsonObject.put(entry.getKey(), entry.getValue());
+					String str = "";
+					if(entry.getValue() == null){
+						jsonObject.put(entry.getKey(), str);
+					}else{
+						jsonObject.put(entry.getKey(), entry.getValue());
+					}
 				}
 				String fileName = "LineNo.json";
 				jsonFileUtil.createWorkshopNoJsonFile(jsonObject.toString(), fileName);
@@ -315,7 +320,7 @@ public class SwipeCardLogin extends JFrame {
 					for (int i = 0; i < con; i++) {
 						String str;
 						str = s[i].toString().trim();
-						if (!(str == null || str.equals("") || str == "0" || str.equals("0"))) {
+						if (!(str == null || str.equals("") || str == "0" || str.equals("0") || str.equals("null"))) {
 							list.add(s[i]);
 						}
 					}

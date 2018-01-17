@@ -106,9 +106,9 @@
     </update>
     
 	<insert id="insertOutWorkSwipeTime" parameterType="SwipeCardTimeInfos">
-		INSERT INTO CSR_SWIPECARDTIME (EMP_ID,SWIPE_DATE,SwipeCardTime2,WorkshopNo,PRIMARY_ITEM_NO, RC_NO,SHIFT,CLASS_NO)
+		INSERT INTO CSR_SWIPECARDTIME (EMP_ID,SWIPE_DATE,SwipeCardTime2,WorkshopNo,PRIMARY_ITEM_NO, RC_NO,SHIFT,CLASS_NO,PROD_LINE_CODE)
 		VALUES
-		(#{EMP_ID},#{SWIPE_DATE}, #{SwipeCardTime2}, #{WorkshopNo}, #{PRIMARY_ITEM_NO}, #{RC_NO}, #{Shift},#{CLASS_NO})
+		(#{EMP_ID},#{SWIPE_DATE}, #{SwipeCardTime2}, #{WorkshopNo}, #{PRIMARY_ITEM_NO}, #{RC_NO}, #{Shift},#{CLASS_NO},#{ProdLineCode})
     </insert>
     
 	 <update id="updateOutWorkNSwipeTime" parameterType="SwipeCardTimeInfos">
@@ -139,9 +139,9 @@
 	</select>
    
     <insert id="insertUserByOnDNShift" parameterType="int">
-		INSERT INTO CSR_SWIPECARDTIME (EMP_ID,SWIPE_DATE,SwipeCardTime,WorkshopNo,PRIMARY_ITEM_NO, RC_NO,SHIFT,CLASS_NO)
+		INSERT INTO CSR_SWIPECARDTIME (EMP_ID,SWIPE_DATE,SwipeCardTime,WorkshopNo,PRIMARY_ITEM_NO, RC_NO,SHIFT,CLASS_NO,PROD_LINE_CODE)
 		VALUES
-		( #{EMP_ID}, #{SWIPE_DATE}, #{SwipeCardTime}, #{WorkshopNo}, #{PRIMARY_ITEM_NO}, #{RC_NO}, #{Shift},#{CLASS_NO})
+		( #{EMP_ID}, #{SWIPE_DATE}, #{SwipeCardTime}, #{WorkshopNo}, #{PRIMARY_ITEM_NO}, #{RC_NO}, #{Shift},#{CLASS_NO},#{ProdLineCode})
     </insert>
     
     <update id="updateChangeLineUserByOnDuty" parameterType="SwipeCardTimeInfos">
@@ -281,6 +281,19 @@
     
     <select id="selectLineNoList" resultType="LineNO">
     	SELECT distinct workshopno,lineno from lineno
+    </select>
+    
+    <select id="getIpByControl_except" parameterType="String" resultType="String">
+    	SELECT com_ip 
+		FROM app_login_control WHERE
+ 		control_except = #{control_except}
+    </select>
+    
+    <select id="isAdminByCardID" parameterType="int" resultType="int">
+    	select count(*) from csr_employee where
+    	 cardid=#{cardid} 
+    	 and Permission=1 
+    	 and isOnWork=0
     </select>
    
 </mapper>  
