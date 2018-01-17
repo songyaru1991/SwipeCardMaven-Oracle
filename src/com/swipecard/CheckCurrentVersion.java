@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.JOptionPane;
 
@@ -22,6 +23,8 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.log4j.Logger;
 
+import com.swipecard.util.DESUtils;
+
 public class CheckCurrentVersion implements Runnable {
 	private static Logger logger = Logger.getLogger(CheckCurrentVersion.class);
 	private boolean active;
@@ -29,14 +32,21 @@ public class CheckCurrentVersion implements Runnable {
 	private static Reader reader;
 	private String localSwipeCardVersion;
 	private Timestamp CurrentDBTimeStamp;
+	
+	static Properties pps = new Properties();
+	static Reader pr = null;
 	static {
 		try {
+			pr = Resources.getResourceAsReader("db.properties");
+			pps.load(pr);
+			pps.setProperty("username", DESUtils.getDecryptString(pps.getProperty("username")));
+			pps.setProperty("password", DESUtils.getDecryptString(pps.getProperty("password")));
 			reader = Resources.getResourceAsReader("Configuration.xml");
 			/*
 			 * String filePath = System.getProperty("user.dir") +
 			 * "/Configuration.xml"; FileReader reader=new FileReader(filePath);
 			 */
-			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader,pps);
 		} catch (Exception e) {
 			logger.error("版本檢查時 Error building SqlSession，原因:"+e);
 			e.printStackTrace();

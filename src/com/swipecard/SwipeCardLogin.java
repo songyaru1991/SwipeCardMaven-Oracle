@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +42,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.swipecard.util.DESUtils;
 import com.swipecard.util.FrameShowUtil;
 import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.SwipeCardJButton;
@@ -54,8 +56,14 @@ public class SwipeCardLogin extends JFrame {
 	final  String defaultWorkshopNo = jsonFileUtil.getSaveWorkshopNo();
 	private static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
+	static Properties pps = new Properties();
+	static Reader pr = null;
 	static {
 		try {
+			pr = Resources.getResourceAsReader("db.properties");
+			pps.load(pr);
+			pps.setProperty("username", DESUtils.getDecryptString(pps.getProperty("username")));
+			pps.setProperty("password", DESUtils.getDecryptString(pps.getProperty("password")));
 			// 读取内部配置文件
 			reader = Resources.getResourceAsReader("Configuration.xml");
 
@@ -64,7 +72,7 @@ public class SwipeCardLogin extends JFrame {
 			 * String filePath = System.getProperty("user.dir") +
 			 * "/Configuration.xml"; FileReader reader=new FileReader(filePath);
 			 */
-			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader,pps);
 			// System.out.println("sqlSessionFactory:"+sqlSessionFactory);
 		} catch (Exception e) {
 			logger.error("Login時 Error building SqlSession，原因:" + e);

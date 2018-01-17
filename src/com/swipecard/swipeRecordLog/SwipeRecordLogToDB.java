@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.executor.ErrorContext;
@@ -23,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.swipecard.util.DESUtils;
 import com.swipecard.util.JsonFileUtil;
 import com.swipecard.model.Employee;
 import com.swipecard.model.RawRecord;
@@ -34,15 +36,21 @@ public class SwipeRecordLogToDB {
 
 	static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
+	static Properties pps = new Properties();
+	static Reader pr = null;
 	static {
 		try {
+			pr = Resources.getResourceAsReader("db.properties");
+			pps.load(pr);
+			pps.setProperty("username", DESUtils.getDecryptString(pps.getProperty("username")));
+			pps.setProperty("password", DESUtils.getDecryptString(pps.getProperty("password")));
 			reader = Resources.getResourceAsReader("Configuration.xml");
 			/*
 			 * String filePath = System.getProperty("user.dir") +
 			 * "/Configuration.xml"; FileReader reader = new
 			 * FileReader(filePath);
 			 */
-			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader,pps);
 		} catch (Exception e) {
 			logger.error("無DB刷卡數據回寫時異常，原因:"+e);
 			e.printStackTrace();

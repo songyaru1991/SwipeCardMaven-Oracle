@@ -16,6 +16,8 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
+import com.swipecard.util.DESUtils;
+
 
 public class CheckIp implements Runnable{
 	private static Logger logger = Logger.getLogger(CheckIp.class);
@@ -29,13 +31,16 @@ public class CheckIp implements Runnable{
 	static Reader pr = null;
 	static {
 		try {
-			
+			pr = Resources.getResourceAsReader("db.properties");
+			pps.load(pr);
+			pps.setProperty("username", DESUtils.getDecryptString(pps.getProperty("username")));
+			pps.setProperty("password", DESUtils.getDecryptString(pps.getProperty("password")));
 			reader = Resources.getResourceAsReader("Configuration.xml");
 			/*
 			 * String filePath = System.getProperty("user.dir") +
 			 * "/Configuration.xml"; FileReader reader=new FileReader(filePath);
 			 */
-			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader,pps);
 		} catch (Exception e) {
 			logger.error("檢測ip時 Error building SqlSession，原因:"+e);
 			e.printStackTrace();
