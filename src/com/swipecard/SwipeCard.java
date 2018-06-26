@@ -510,6 +510,9 @@ public class SwipeCard extends JFrame {
 						System.out.println("無輸入內容或輸入錯誤!");
 					}
 				}
+				if (session != null) {
+					session.close();
+				}
 
 			}
 		});
@@ -544,8 +547,9 @@ public class SwipeCard extends JFrame {
 				String RC_NO = jtf.getText();
 				String PRIMARY_ITEM_NO = textT2_1.getText();
 				String Name = "", empID = "";
+				SqlSession session = null;
 				try {
-					SqlSession session = sqlSessionFactory.openSession();
+					session = sqlSessionFactory.openSession();
 					StringBuilder strBuilder = new StringBuilder();
 					for (int i = 0; i < RC_NO.length(); i++) {
 						char charAt = RC_NO.charAt(i);
@@ -611,6 +615,9 @@ public class SwipeCard extends JFrame {
 					throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e1, e1);
 				} finally {
 					ErrorContext.instance().reset();
+					if (session != null) {
+						session.close();
+					}
 				}
 			}
 		});
@@ -685,7 +692,7 @@ public class SwipeCard extends JFrame {
 							Employee eif = (Employee) session.selectOne("selectUserByCardID", CardID);
 							//只要刷卡都將記錄至raw_record table
 							String Record_Status=null;
-							swipeCardService.addRawSwipeRecord(session, eif, CardID, swipeCardTime, WorkshopNo,Record_Status);
+							addRawSwipeRecord(session, eif, CardID, swipeCardTime, WorkshopNo,Record_Status);
 							RawRecord swipeRecord = new RawRecord();
 							swipeRecord.setCardID(CardID);
 							swipeRecord.setSwipeCardTime(swipeCardTime);
@@ -1048,6 +1055,36 @@ public class SwipeCard extends JFrame {
 			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 		}
 		return false;
+	}
+	
+	/*當員工刷卡時，立即記錄一筆刷卡資料至raw_record table中*/
+	public void addRawSwipeRecord(SqlSession session, Employee eif, String CardID,Date SwipeCardTime,String WorkshopNo,String Record_Status) {
+		String Id=null;
+		try {
+			if(eif!=null)
+				Id=eif.getId();
+			if(Id==null){
+				Id="";
+			}
+			synchronized (this) {	
+				GetLocalHostIpAndName hostIP=new GetLocalHostIpAndName();
+				String swipeCardHostIp=hostIP.getLocalIp();
+				
+				RawRecord swipeRecord=new RawRecord();
+				swipeRecord.setCardID(CardID);
+				swipeRecord.setId(Id);
+				swipeRecord.setSwipeCardTime(SwipeCardTime);
+				swipeRecord.setRecord_Status(Record_Status);
+				swipeRecord.setSwipeCardHostIp(swipeCardHostIp);
+				session.insert("addRawSwipeRecord", swipeRecord);
+				session.commit();
+			}
+		}
+		catch(Exception ex) {
+			dispose();
+			SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
+			ex.printStackTrace();
+		}
 	}
 
 }

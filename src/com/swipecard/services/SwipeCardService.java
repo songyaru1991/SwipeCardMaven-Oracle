@@ -158,8 +158,9 @@ public class SwipeCardService {
 			else
 				workedOneWeek.setWorkedOneWeek(true);
 		} catch (Exception ex) {
-			SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
-			ex.printStackTrace();
+			/*SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
+			ex.printStackTrace();*/
+			workedOneWeek.setWorkedOneWeek(false);
 		}
 		return workedOneWeek;
 	}

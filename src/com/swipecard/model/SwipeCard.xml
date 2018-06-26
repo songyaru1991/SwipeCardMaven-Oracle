@@ -106,9 +106,9 @@
     </update>
     
 	<insert id="insertOutWorkSwipeTime" parameterType="SwipeCardTimeInfos">
-		INSERT INTO CSR_SWIPECARDTIME (EMP_ID,SWIPE_DATE,SwipeCardTime2,WorkshopNo,PRIMARY_ITEM_NO, RC_NO,SHIFT,CLASS_NO,PROD_LINE_CODE)
+		INSERT INTO CSR_SWIPECARDTIME (EMP_ID,SWIPE_DATE,SwipeCardTime2,WorkshopNo,PRIMARY_ITEM_NO, SHIFT,CLASS_NO,PROD_LINE_CODE)
 		VALUES
-		(#{EMP_ID},#{SWIPE_DATE}, #{SwipeCardTime2}, #{WorkshopNo}, #{PRIMARY_ITEM_NO}, #{RC_NO}, #{Shift},#{CLASS_NO},#{ProdLineCode})
+		(#{EMP_ID},#{SWIPE_DATE}, #{SwipeCardTime2}, #{WorkshopNo}, #{PRIMARY_ITEM_NO}, #{Shift},#{CLASS_NO},#{ProdLineCode})
     </insert>
     
 	 <update id="updateOutWorkNSwipeTime" parameterType="SwipeCardTimeInfos">
@@ -139,9 +139,9 @@
 	</select>
    
     <insert id="insertUserByOnDNShift" parameterType="int">
-		INSERT INTO CSR_SWIPECARDTIME (EMP_ID,SWIPE_DATE,SwipeCardTime,WorkshopNo,PRIMARY_ITEM_NO, RC_NO,SHIFT,CLASS_NO,PROD_LINE_CODE)
+		INSERT INTO CSR_SWIPECARDTIME (EMP_ID,SWIPE_DATE,SwipeCardTime,WorkshopNo,PRIMARY_ITEM_NO,SHIFT,CLASS_NO,PROD_LINE_CODE)
 		VALUES
-		( #{EMP_ID}, #{SWIPE_DATE}, #{SwipeCardTime}, #{WorkshopNo}, #{PRIMARY_ITEM_NO}, #{RC_NO}, #{Shift},#{CLASS_NO},#{ProdLineCode})
+		( #{EMP_ID}, #{SWIPE_DATE}, #{SwipeCardTime}, #{WorkshopNo}, #{PRIMARY_ITEM_NO}, #{Shift},#{CLASS_NO},#{ProdLineCode})
     </insert>
     
     <update id="updateChangeLineUserByOnDuty" parameterType="SwipeCardTimeInfos">

@@ -63,8 +63,9 @@ public class CheckIp implements Runnable{
 	private Object[] getIpByControl_except(String str) {
 		List<String> ip;
 		Object[] a = null;
+		SqlSession session = null;
 		try {
-			SqlSession session = sqlSessionFactory.openSession();
+			session = sqlSessionFactory.openSession();
 			ip = session.selectList("getIpByControl_except",str);
 			int con = ip.size();
 			if(con > 0){
@@ -85,6 +86,9 @@ public class CheckIp implements Runnable{
 			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
 		} finally {
 			ErrorContext.instance().reset();
+			if (session != null) {
+				session.close();
+			}
 		}
 		return a;
 	}
