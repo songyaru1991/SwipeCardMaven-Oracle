@@ -150,6 +150,8 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 			}
 			if(outWorkSwipeTime!=null && !outWorkSwipeTime.equals("")){	
 				sTime2 = dateFormatter.format(outWorkSwipeTime);
+			}else{
+				sTime2 = "";
 			}
 			Object[] tableSwipeInfos = {State,j,empId,Name,sTime1,sTime2,rcno};
 			j++;

@@ -136,7 +136,7 @@ public class SwipeCardNoDB extends JFrame {
 
 		super("產線端刷卡無DB模式"+CurrentVersion);
 		//setBounds(12, 84, 1000, 630);		
-		if(workshopNoWithDB == "" || workshopNoWithDB.equals("")){
+		if(workshopNoWithDB == null || workshopNoWithDB == "" || workshopNoWithDB.equals("")){
 			workshopNoWithDB = jsonFileUtil.getSaveWorkshopNo();
 		}
 
