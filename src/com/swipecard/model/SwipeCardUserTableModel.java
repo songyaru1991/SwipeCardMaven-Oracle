@@ -79,27 +79,36 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 			empId=swipeInfos.get(i).getEMP_ID();
 			Employee empInfo = session.selectOne(
 					"selectUserByEmpId", empId);
-			Name = empInfo.getName();		
-			if(Name==null){
-				Name="";
-			}
-			rcno = swipeInfos.get(i).getRC_NO();
-			if(rcno==null){
-				rcno="";
-			}			
+			if(empInfo!=null){
+				if(empInfo.getName()==null){
+					Name="";
+				}else{
+					Name = empInfo.getName();
+				}
+				
+				if(swipeInfos.get(i).getRC_NO()==null){
+					rcno="";
+				}else{
+					rcno = swipeInfos.get(i).getRC_NO();
+				}	
 			Date goWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime();
 			Date outWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime2();
 			SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			if(goWorkSwipeTime!=null && !goWorkSwipeTime.equals("")){				
 				sTime1 = dateFormatter.format(goWorkSwipeTime);
+			}else{
+				sTime1 = "";
 			}
 			if(outWorkSwipeTime!=null && !outWorkSwipeTime.equals("")){	
 				sTime2 = dateFormatter.format(outWorkSwipeTime);
+			}else{
+				sTime2 = "";
 			}
 
 			Object[] tableSwipeInfos = { State, j,empId, Name, sTime1, sTime2, rcno };
 			j++;
 			TableData.add(tableSwipeInfos);
+			}
 		}
 	
 	}
@@ -134,19 +143,25 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 			empId=swipeInfos.get(i).getEMP_ID();
 			Employee empInfo = session.selectOne(
 						"selectUserByEmpId", empId);			
-			Name = empInfo.getName();
-			if(Name==null){
+			if(empInfo!=null){
+			if(empInfo.getName()==null){
 				Name="";
+			}else{
+				Name = empInfo.getName();
 			}
-			rcno = swipeInfos.get(i).getRC_NO();
-			if(rcno==null){
+			
+			if(swipeInfos.get(i).getRC_NO()==null){
 				rcno="";
-			}				
+			}else{
+				rcno = swipeInfos.get(i).getRC_NO();
+			}
 			Date goWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime();
 			Date outWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime2();
 			SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			if(goWorkSwipeTime!=null && !goWorkSwipeTime.equals("")){				
 				sTime1 = dateFormatter.format(goWorkSwipeTime);
+			}else{
+				sTime1 = "";
 			}
 			if(outWorkSwipeTime!=null && !outWorkSwipeTime.equals("")){	
 				sTime2 = dateFormatter.format(outWorkSwipeTime);
@@ -156,6 +171,7 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 			Object[] tableSwipeInfos = {State,j,empId,Name,sTime1,sTime2,rcno};
 			j++;
 			TableData.add(tableSwipeInfos);
+		}
 		}
 	}
 		finally {

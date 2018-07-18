@@ -15,7 +15,7 @@ public class AutoUpdate {
 	public void update(){
 		File file = new File("D:/swipeCard/update.jar");
 		if(!file.exists()){
-			boolean R = downFile("192.168.60.112",   "user", "user", 
+			boolean R = downFile("192.168.60.113",   "user", "user", 
 					"", "update.jar", "D:/swipeCard");
 		}
 	}
@@ -70,6 +70,7 @@ public class AutoUpdate {
             int dialogResult = JOptionPane.showConfirmDialog(null,
 					"獲取更新程序失敗，请重新打开程序或者联系管理员", "獲取更新程序失敗",
 					JOptionPane.DEFAULT_OPTION);
+            System.exit(0);
         } finally {    
             if (ftp.isConnected()) {    
                 try {    
