@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,7 +57,7 @@ import com.swipecard.util.PingDBIPUtil;
 import com.swipecard.util.SwipeCardJButton;
 
 public class SwipeCardNoDB extends JFrame {
-	private final static String CurrentVersion="V20171113";	
+	private final static String CurrentVersion="V20180910";	
 	private static Logger logger = Logger.getLogger(SwipeCardNoDB.class);
 	private String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	private String time;
@@ -64,8 +65,8 @@ public class SwipeCardNoDB extends JFrame {
 	static JsonFileUtil jsonFileUtil = new JsonFileUtil();
 	final JSONObject LineNoObject = jsonFileUtil.getLineNoByJson();
 	Object[] lineno = null;
-	final String defaultLineNo = jsonFileUtil.getSaveLineNo();
-
+	final String defaultLineNo = null;
+	String uuid = UUID.randomUUID().toString().replace("-", "").toUpperCase();
 	static JTabbedPane tabbedPane;
 	static JLabel label1, label3, swipeTimeLable, curTimeLable;
 	static JPanel panel1;
@@ -100,7 +101,7 @@ public class SwipeCardNoDB extends JFrame {
 		@Override
 		public void run() {
 			PingDBIPUtil PingUtil = new PingDBIPUtil();
-		    String ipAddress = "192.168.144.187";
+		    String ipAddress = "192.168.244.59";
 	        try {
 				 // System.out.println(PingUtil.ping(ipAddress));
 				 // PingUtil.ping02(ipAddress);
@@ -133,13 +134,13 @@ public class SwipeCardNoDB extends JFrame {
 	}
 
 	public SwipeCardNoDB(String workshopNoWithDB) {
-
+		
 		super("產線端刷卡無DB模式"+CurrentVersion);
 		//setBounds(12, 84, 1000, 630);		
 		if(workshopNoWithDB == null || workshopNoWithDB == "" || workshopNoWithDB.equals("")){
 			workshopNoWithDB = jsonFileUtil.getSaveWorkshopNo();
 		}
-
+		
 		Container c = getContentPane();
 		tabbedPane = new JTabbedPane(JTabbedPane.LEFT); // 创建选项卡面板对象
 
@@ -366,7 +367,7 @@ public class SwipeCardNoDB extends JFrame {
 							swipeCardRecord.put("WorkshopNo", selectWorkShopNo);
 							// String filePath = System.getProperty("user.dir");
 							String filePath = "D:/SwipeCard/logs/SwipeCardRecordLogs/";
-							String fileName = "swipeCardRecord" + FormatDateUtil.getCurDate() + ".json";
+							String fileName = uuid + FormatDateUtil.getCurDate() + ".json";
 							String swipeCardRecordSavePath = filePath + fileName;
 							File file = new File(swipeCardRecordSavePath);
 							JSONArray swipeCardData = new JSONArray();

@@ -68,11 +68,12 @@ import com.swipecard.model.SwipeCardTimeInfos;
 import com.swipecard.model.SwipeCardUserTableModel;
 import com.swipecard.model.WorkedOneWeek;
 import com.swipecard.services.SwipeCardService;
+import com.swipecard.swipeRecordLog.SwipeRecordLogToDB;
 
 public class SwipeCard extends JFrame {
 
 	private static final long serialVersionUID = 1216479862784043108L;
-	private final static String CurrentVersion="V20171113(FD通訊不卡七休一)";
+	private final static String CurrentVersion="V20180910";
 	private static Logger logger = Logger.getLogger(SwipeCard.class);
 	private Vector<Vector<Object>> rowData = new Vector<Vector<Object>>();
 	private JTable table;
@@ -143,7 +144,7 @@ public class SwipeCard extends JFrame {
 		}
 	}
 
-	public SwipeCard(final String WorkshopNo, String LineNo) {
+	public SwipeCard(final String WorkshopNo,final String LineNo) {
 
 		super("產線端刷卡程式-"+CurrentVersion);
 		SwipeCardService service=new SwipeCardService();
@@ -248,19 +249,19 @@ public class SwipeCard extends JFrame {
 			ShiftRcNo = "D";
 		}
 
-		myModel = new SwipeCardUserTableModel(WorkshopNo, ShiftRcNo);
+		myModel = new SwipeCardUserTableModel(WorkshopNo, ShiftRcNo ,LineNo);
 		mytable = new JTable(myModel);
 		setTable();
 		myScrollPane = new JScrollPane(mytable);
-		myScrollPane.setBounds(310, 40, 520, 400);
+		myScrollPane.setBounds(360, 40, 520, 400);
 
-		int x1 = 15, x2 = 100, x3 = 200, x4 = 400, x5 = 130, x6 = 460, x7 = 90;
+		int x1 = 15, x2 = 100, x3 = 200, x4 = 400, x5 = 130, x6 = 460, x7 = 90, x8 = 50;
 		int y1 = 40, y4 = 180;
 
 		labelT2_1.setBounds(x1, y1, x7, y1);
 		labelT2_2.setBounds(x1, 2 * y1 + 10, x7, y1);
-		comboBox2.setBounds(x1 + x7, y1, x3, y1); 
-		comboBox.setBounds(x1 + x7, 2 * y1 + 10, x3, y1);
+		comboBox2.setBounds(x1 + x7, y1, x3 + x8, y1); 
+		comboBox.setBounds(x1 + x7, 2 * y1 + 10, x3 + x8, y1);
 
 		labelT2_3.setBounds(x1, 2 * y1 + 10, x7, y1);
 
@@ -558,7 +559,7 @@ public class SwipeCard extends JFrame {
 						strBuilder.append(charAt);
 					}
 					RC_NO = strBuilder.toString();
-
+					
 					if (!RC_NO.equals("") && RC_NO != "" && RC_NO != null) {						
 						RCLine rcLine = new RCLine();
 						rcLine.setPROD_LINE_CODE(WorkshopNo);
@@ -576,33 +577,34 @@ public class SwipeCard extends JFrame {
 								}
 							}
 						}
-						if (isaddItem) {
-							session.insert("insertRCInfo", rcLine);
-							session.commit();
-						}
-						for (int i = 0; i < countRow; i++) {
-							State = (Boolean) mytable.getValueAt(i, 0);
-							if (State == true) {
-								empID = (String) mytable.getValueAt(i, 2);
-								Name = (String) mytable.getValueAt(i, 3);
-							    SwipeCardTimeInfos swipeInfo=new SwipeCardTimeInfos();
-								swipeInfo.setEMP_ID(empID);
-								swipeInfo.setRC_NO(RC_NO);
-								swipeInfo.setPRIMARY_ITEM_NO(PRIMARY_ITEM_NO);
-								session.update("Update_rcno_ByLineNOandCardID", swipeInfo);
-								session.commit();
+						if (!isaddItem) {
+							for (int i = 0; i < countRow; i++) {
+								State = (Boolean) mytable.getValueAt(i, 0);
+								if (State == true) {
+									empID = (String) mytable.getValueAt(i, 2);
+									Name = (String) mytable.getValueAt(i, 3);
+								    SwipeCardTimeInfos swipeInfo=new SwipeCardTimeInfos();
+									swipeInfo.setEMP_ID(empID);
+									swipeInfo.setRC_NO(RC_NO);
+									swipeInfo.setPRIMARY_ITEM_NO(PRIMARY_ITEM_NO);
+									session.update("Update_rcno_ByLineNOandCardID", swipeInfo);
+									session.commit();
+								}
 							}
+						}else{
+							JOptionPane.showMessageDialog(null, "指示單號不存在!", "提示", JOptionPane.WARNING_MESSAGE);
 						}
+						
 					} else {
 						JOptionPane.showMessageDialog(null, "指示單號不得為空!", "提示", JOptionPane.WARNING_MESSAGE);
 					}
 
 					panel2.remove(myScrollPane);
-					myModel = new SwipeCardUserTableModel(WorkshopNo, "D");
+					myModel = new SwipeCardUserTableModel(WorkshopNo, "D" , LineNo);
 					mytable = new JTable(myModel);
 					setTable();
 					myScrollPane = new JScrollPane(mytable);
-					myScrollPane.setBounds(310, 40, 520, 400);
+					myScrollPane.setBounds(360, 40, 520, 400);
 					panel2.add(myScrollPane);
 					panel2.updateUI(); // 重绘
 					panel2.repaint(); // 重绘此组件。
@@ -636,6 +638,24 @@ public class SwipeCard extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				str1 = getRcLine();
+			}
+		});
+		
+		comboBox.getEditor().getEditorComponent().addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
 			}
 		});
 
@@ -702,7 +722,7 @@ public class SwipeCard extends JFrame {
 								int lostRows = session.selectOne("selectLoseEmployee", swipeRecord);				
 								if (lostRows > 1) {
 									
-									jtextT1_1.setText("已記錄當前異常刷卡人員，今天不用再次刷卡！\n");
+									jtextT1_1.setText("已記錄當前異常刷卡人員，當前刷卡人員不存在，今天不用再次刷卡！\n");
 									jtextT1_1.setBackground(Color.RED);
 									textT1_3.setText("");
 									session.update("updateRawRecordStatus",swipeRecord);
@@ -727,6 +747,8 @@ public class SwipeCard extends JFrame {
 								String PROD_LINE_CODE = linenoLabel.getText();
 								//判斷該卡號是否已連續工作六天
 								WorkedOneWeek workedOneWeek=swipeCardService.isUserContinuesWorkedOneWeek(session, eif, CardID, WorkshopNo, swipeCardTime);
+								//是否卡七休一
+//								workedOneWeek.setWorkedOneWeek(false);
 								if(!workedOneWeek.isWorkedOneWeek()){					
 									
 									//該卡號是連續工作日小於六天
@@ -939,12 +961,14 @@ public class SwipeCard extends JFrame {
 	}
 	
 	public static void main(String args[]) {
-		boolean OneWindow = OpenOneWindow.checkLock();
+		//boolean OneWindow = OpenOneWindow.checkLock();
+		//秦川那邊不卡單開程序
+		Boolean OneWindow = true;
 		if (OneWindow) {
 		InitGlobalFont(new Font("微软雅黑", Font.BOLD, 18));
 		SwipeCardService swipeCardService = new SwipeCardService();
-		String WorkShopNo = null;
-		String LineNo =null;
+		String WorkShopNo = "";
+		String LineNo ="";
 		if(defaultLineNo != null){
 			LineNo = defaultLineNo;
 		}
@@ -960,9 +984,11 @@ public class SwipeCard extends JFrame {
 		Thread executeCheckIp = new Thread(checkIp);
 		executeCheckIp.start();
 		//检测版本是否最新
-		/*CheckCurrentVersion chkVersion = new CheckCurrentVersion(CurrentVersion);
+		CheckCurrentVersion chkVersion = new CheckCurrentVersion(CurrentVersion);
 		Thread executeCheckVersion = new Thread(chkVersion);
-		executeCheckVersion.start();*/
+		executeCheckVersion.start();
+		SwipeRecordLogToDB logToDB=new SwipeRecordLogToDB();
+		logToDB.SwipeRecordLogToDB();
 		} else {
 			JOptionPane.showConfirmDialog(null, "程序已經開啟，請不要重複開啟", "程序重複打開", JOptionPane.DEFAULT_OPTION);
 			System.exit(0);
@@ -974,6 +1000,7 @@ public class SwipeCard extends JFrame {
 		//String WorkshopNo = textT1_1.getText();
 		String WorkshopNo = workShopNoJlabel.getText();
 		Object ShiftName = comboBox2.getSelectedItem();
+		String LineNo = linenoLabel.getText();
 		System.out.println("comboBox2" + ShiftName);
 		String ShiftRcNo = "";
 		if (ShiftName.equals("夜班")) {
@@ -983,12 +1010,12 @@ public class SwipeCard extends JFrame {
 		}
 
 		panel2.remove(myScrollPane);
-		myModel = new SwipeCardUserTableModel(WorkshopNo, ShiftRcNo);
+		myModel = new SwipeCardUserTableModel(WorkshopNo, ShiftRcNo , LineNo);
 		mytable = new JTable(myModel);
-
-		myScrollPane = new JScrollPane(mytable);
-		myScrollPane.setBounds(310, 40, 520, 400);
 		setTable();
+		myScrollPane = new JScrollPane(mytable);
+		myScrollPane.setBounds(360, 40, 520, 400);
+		
 		panel2.add(myScrollPane);
 		panel2.updateUI();
 		panel2.repaint();
@@ -1011,7 +1038,7 @@ public class SwipeCard extends JFrame {
 		try {
 			rcLine = session.selectList("selectRCNo");
 			int con = rcLine.size();
-			System.out.println(rcLine.size());
+			System.out.println("rcLine"+rcLine.size());
 			Object[] a = null;
 			if (con > 0) {
 				a = new Object[con + 1];

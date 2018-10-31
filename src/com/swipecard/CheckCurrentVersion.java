@@ -112,14 +112,16 @@ public class CheckCurrentVersion implements Runnable {
 						autoUpdate.update();
 						try {
 							Process exec = Runtime.getRuntime().exec("java -jar D:/swipeCard/update.jar");
+							System.exit(0);
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 							int dialogResult = JOptionPane.showConfirmDialog(null,
 									"開啟更新程序失敗，请重新打开程序或者联系管理员", "開啟更新程序失敗",
 									JOptionPane.DEFAULT_OPTION);
+							System.exit(0);
 						}
-						System.exit(0);
+						
 					}
 
 				}

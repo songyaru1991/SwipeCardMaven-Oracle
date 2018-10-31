@@ -113,9 +113,10 @@ public class DESUtils {
 
 	public static void main(String[] args) {
 
-		String cod = getEncryptString("mis_swipe");
-
-		System.out.println(cod);
+		String cod = getEncryptString("usc");
+		String cod2 = getEncryptString("mis_sc");
+		String cod1 = getDecryptString("SwSYTqKMoSs=");
+		System.out.println(cod+"----"+cod2);
 
 	}
 

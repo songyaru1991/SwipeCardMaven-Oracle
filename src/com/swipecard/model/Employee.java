@@ -74,4 +74,12 @@ public class Employee {
 	public void setUpdateDate(Date updateDate) {
 		UpdateDate = updateDate;
 	}
+	@Override
+	public String toString() {
+		return "Employee [Id=" + Id + ", Name=" + Name + ", depid=" + depid + ", depname=" + depname + ", CardID="
+				+ CardID + ", Direct=" + Direct + ", CostID=" + CostID + ", Permission=" + Permission + ", isOnWork="
+				+ isOnWork + ", UpdateDate=" + UpdateDate + "]";
+	}
+	
+	
 }

@@ -416,9 +416,9 @@ public class SwipeCardLogin extends JFrame {
 		InitGlobalFont(new Font("微软雅黑", Font.BOLD, 18));
 		SwipeCardLogin d = new SwipeCardLogin();
 
-		CheckCurrentVersion chkVersion = new CheckCurrentVersion(CurrentVersion);
+		/*CheckCurrentVersion chkVersion = new CheckCurrentVersion(CurrentVersion);
 		Thread executeCheckVersion = new Thread(chkVersion);
-		executeCheckVersion.start();
+		executeCheckVersion.start();*/
 
 	}
 

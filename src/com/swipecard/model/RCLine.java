@@ -7,7 +7,7 @@ public class RCLine {
 	private String PRIMARY_ITEM_NO;
 	private String STD_MAN_POWER;
 	private String PROD_LINE_CODE;
-	private Date CUR_DATE;
+	private Date CREATION_DATE;
 	
 	public String getRC_NO() {
 		return RC_NO;
@@ -33,11 +33,11 @@ public class RCLine {
 	public void setPROD_LINE_CODE(String pROD_LINE_CODE) {
 		PROD_LINE_CODE = pROD_LINE_CODE;
 	}
-	public Date getCUR_DATE() {
-		return CUR_DATE;
+	public Date getCREATION_DATE() {
+		return CREATION_DATE;
 	}
-	public void setCUR_DATE(Date cUR_DATE) {
-		CUR_DATE = cUR_DATE;
+	public void setCREATION_DATE(Date cREATION_DATE) {
+		CREATION_DATE = cREATION_DATE;
 	}
 	
 

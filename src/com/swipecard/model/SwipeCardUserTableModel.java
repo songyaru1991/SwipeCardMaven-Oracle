@@ -114,7 +114,7 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 	}
 
 	// public MyNewTableModel(String lineno,String Shift){
-	public SwipeCardUserTableModel(String WorkshopNo,String Shift){		
+	public SwipeCardUserTableModel(String WorkshopNo,String Shift,String Lineno){		
 		// 先new 一下
 		TableData = new Vector<Object>();
 		SqlSession session = sqlSessionFactory.openSession();
@@ -123,11 +123,16 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 		SwipeCardTimeInfos swipeUser = new SwipeCardTimeInfos();
 		swipeUser.setSwipeCardTime(time);
 		swipeUser.setWorkshopNo(WorkshopNo);
+		if(Lineno == null || Lineno.equals("")){
+			Lineno = "0";
+		}
+		System.out.println(Lineno);
+		swipeUser.setProdLineCode(Lineno);
 		List<SwipeCardTimeInfos> swipeInfos = null;
 		try{
 		if(Shift=="D"){
 			swipeInfos = session.selectList(
-					"selectUserByLineNoAndWorkshopNo_DShift", WorkshopNo);
+					"selectUserByLineNoAndWorkshopNo_DShift", swipeUser);
 		}else if(Shift=="N"){
 			swipeInfos = session.selectList(
 					"selectUserByLineNoAndWorkshopNo_NShift", swipeUser);
@@ -241,7 +246,7 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 
 	public static void main(String[] args) {
 		JFrame frm = new JFrame();
-		SwipeCardUserTableModel myModel = new SwipeCardUserTableModel("3L-37", "D");
+		SwipeCardUserTableModel myModel = new SwipeCardUserTableModel("3L-37", "D" ,"123");
 
 		JTable mytable = new JTable(myModel);
 		mytable.setRowHeight(50);
