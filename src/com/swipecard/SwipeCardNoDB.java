@@ -6,6 +6,10 @@ import java.awt.Font;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
 import java.io.BufferedReader;
@@ -15,11 +19,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,27 +51,32 @@ import org.json.JSONObject;
 import com.swipecard.swipeRecordLog.SwipeRecordLogToDB;
 import com.swipecard.util.FormatDateUtil;
 import com.swipecard.util.FrameShowUtil;
+import com.swipecard.util.GetLocalHostIpAndName;
 import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.PingDBIPUtil;
 import com.swipecard.util.SwipeCardJButton;
 
 public class SwipeCardNoDB extends JFrame {
-	private final static String CurrentVersion="V20171113";	
+	private final static String CurrentVersion="V20180910";	
 	private static Logger logger = Logger.getLogger(SwipeCardNoDB.class);
 	private String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	private String time;
 	private int ONE_SECOND = 1000;
-
+	static JsonFileUtil jsonFileUtil = new JsonFileUtil();
+	final JSONObject LineNoObject = jsonFileUtil.getLineNoByJson();
+	Object[] lineno = null;
+	final String defaultLineNo = null;
+	String uuid = UUID.randomUUID().toString().replace("-", "").toUpperCase();
 	static JTabbedPane tabbedPane;
 	static JLabel label1, label3, swipeTimeLable, curTimeLable;
 	static JPanel panel1;
 	static ImageIcon image;
-	static JLabel labelT1_1, labelT1_3;
+	static JLabel labelT1_1, labelT1_3, labelT1_4;
 	static SwipeCardJButton butT1_5, butT1_6;
 	static JTextArea jtextT1_1, jtextT1_2;
 	static TextField textT1_3, textT1_1;
 	static JScrollPane jspT1_1, JspTable, myScrollPane;
-	static JComboBox comboBox1;
+	static JComboBox comboBox1, comboBox2;
 	static JTextField jtf1;
 
 	/**
@@ -90,7 +101,7 @@ public class SwipeCardNoDB extends JFrame {
 		@Override
 		public void run() {
 			PingDBIPUtil PingUtil = new PingDBIPUtil();
-		    String ipAddress = "192.168.144.187";
+		    String ipAddress = "192.168.244.59";
 	        try {
 				 // System.out.println(PingUtil.ping(ipAddress));
 				 // PingUtil.ping02(ipAddress);
@@ -98,13 +109,17 @@ public class SwipeCardNoDB extends JFrame {
 			        
 			       // String selectWorkShopNo = comboBox1.getSelectedItem().toString();
 			        String selectWorkShopNo = jtf1.getText();
+			        String selectLineNo = comboBox2.getSelectedItem().toString();
+			        if(selectLineNo == "不需要選擇線號"){
+						selectLineNo=null;
+					}
 					if(PingUtil.ping(ipAddress, 5, 5000))
 					{
 						//暂时不启用无网络刷卡记录回写DB模式
+						dispose();
 						SwipeRecordLogToDB logToDB=new SwipeRecordLogToDB();
 						logToDB.SwipeRecordLogToDB();
-						dispose();
-						SwipeCard swipe = new SwipeCard(selectWorkShopNo);
+						SwipeCard swipe = new SwipeCard(selectWorkShopNo,selectLineNo);
 					    this.cancel();
 					}
 					
@@ -119,10 +134,13 @@ public class SwipeCardNoDB extends JFrame {
 	}
 
 	public SwipeCardNoDB(String workshopNoWithDB) {
-
+		
 		super("產線端刷卡無DB模式"+CurrentVersion);
 		//setBounds(12, 84, 1000, 630);		
-
+		if(workshopNoWithDB == null || workshopNoWithDB == "" || workshopNoWithDB.equals("")){
+			workshopNoWithDB = jsonFileUtil.getSaveWorkshopNo();
+		}
+		
 		Container c = getContentPane();
 		tabbedPane = new JTabbedPane(JTabbedPane.LEFT); // 创建选项卡面板对象
 
@@ -147,6 +165,9 @@ public class SwipeCardNoDB extends JFrame {
 
 		labelT1_3 = new JLabel("刷卡:");
 		labelT1_3.setFont(new Font("微软雅黑", Font.BOLD, 25));
+		
+		labelT1_4 = new JLabel("線號:");
+		labelT1_4.setFont(new Font("微软雅黑", Font.BOLD, 25));
 
 		JsonFileUtil jsonFileUtil = new JsonFileUtil();
 		final Object[] WorkshopNo = jsonFileUtil.getWorkshopNoByJson();
@@ -155,6 +176,20 @@ public class SwipeCardNoDB extends JFrame {
 		comboBox1.setFont(new Font("微软雅黑", Font.PLAIN, 18));
 		if(workshopNoWithDB!=null){
 			comboBox1.setSelectedItem(workshopNoWithDB);
+		}
+		
+		comboBox2 = new JComboBox();
+		comboBox2.setEditable(true);
+		lineno = getLineno(comboBox1.getSelectedItem().toString());
+		if (lineno != null) {
+			for (Object object : lineno) {
+				comboBox2.addItem(object);
+			}
+		} else {
+			comboBox2.addItem("不需要選擇線號");
+		}
+		if (defaultLineNo != null) {
+			comboBox2.setSelectedItem(defaultLineNo);
 		}
 
 		jtf1 = (JTextField) comboBox1.getEditor().getEditorComponent();
@@ -170,6 +205,8 @@ public class SwipeCardNoDB extends JFrame {
 
 		labelT1_1.setBounds(x1 + 20, y1, x7, y1);
 		labelT1_3.setBounds(x1 + 20, 2 * y1 + 20, x7, y1);
+		labelT1_4.setBounds(x1 + 20, 4 * y1 + 80, x7, y1);
+		comboBox2.setBounds(x1 + x7, 4 * y1 + 80, y4 + 100, y1);
 
 		// textT1_1.setBounds(x1 + x7, 1 * y1, y4 + 100, y1);
 		comboBox1.setBounds(x1 + x7, 1 * y1, y4 + 100, y1);
@@ -215,9 +252,11 @@ public class SwipeCardNoDB extends JFrame {
 		butT1_5.setBounds(x6, 350 + y1 + 20, x5, y1);
 		butT1_6.setBounds(x6 + 160, 350 + y1 + 20, x5, y1);
 		panel1.add(comboBox1);
+		panel1.add(comboBox2);
 		// panel1.add(textT1_1);
 		panel1.add(textT1_3);
 
+		panel1.add(labelT1_4);
 		panel1.add(labelT1_1);
 		panel1.add(labelT1_3);
 		panel1.add(swipeTimeLable);
@@ -259,13 +298,46 @@ public class SwipeCardNoDB extends JFrame {
 				System.exit(0);
 			}
 		});
+		
+		comboBox1.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				// TODO Auto-generated method stub
+
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					String key = jtf1.getText();
+					lineno = getLineno(comboBox1.getSelectedItem().toString());
+					comboBox2.removeAllItems();
+					if (lineno != null) {
+						for (Object object : lineno) {
+							comboBox2.addItem(object);
+						}
+					} else {
+						comboBox2.addItem("不需要選擇線號");
+					}
+				}
+			}
+		});
 
 		// TODO 刷卡模式
-		textT1_3.addTextListener(new TextListener() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public void textValueChanged(TextEvent e) {
+        textT1_3.addKeyListener(new KeyListener() {
+        			
+        	@Override
+        	public void keyTyped(KeyEvent e) {
+        		// TODO Auto-generated method stub
+        		   
+        	}      
+        	       
+        	@Override
+        	public void keyReleased(KeyEvent e) {
+        		// TODO Auto-generated method stub
+        		   
+        	}      
+        	       
+        	@Override
+        	public void keyPressed(KeyEvent e) {
+        		if(e.getKeyChar() == KeyEvent.VK_ENTER){
 
 				String CardID = textT1_3.getText();
 
@@ -281,7 +353,11 @@ public class SwipeCardNoDB extends JFrame {
 					jtextT1_1.setBackground(Color.WHITE);
 					jtextT1_1.setText("卡號輸入有誤，請再次刷卡\n");
 					textT1_3.setText("");
-				} else {
+				} else if(CardID.length()<10){
+					jtextT1_1.setBackground(Color.RED);
+					jtextT1_1.setText("卡號輸入有誤，請再次刷卡\n");
+					textT1_3.setText("");
+				}else {
 					String pattern = "^[0-9]\\d{9}$";
 					Pattern r = Pattern.compile(pattern, Pattern.DOTALL);
 					Matcher m = r.matcher(CardID);
@@ -291,7 +367,7 @@ public class SwipeCardNoDB extends JFrame {
 							swipeCardRecord.put("WorkshopNo", selectWorkShopNo);
 							// String filePath = System.getProperty("user.dir");
 							String filePath = "D:/SwipeCard/logs/SwipeCardRecordLogs/";
-							String fileName = "swipeCardRecord" + FormatDateUtil.getCurDate() + ".json";
+							String fileName = uuid + FormatDateUtil.getCurDate() + ".json";
 							String swipeCardRecordSavePath = filePath + fileName;
 							File file = new File(swipeCardRecordSavePath);
 							JSONArray swipeCardData = new JSONArray();
@@ -352,6 +428,7 @@ public class SwipeCardNoDB extends JFrame {
 						System.out.println("無輸入內容或輸入錯誤!");
 					}
 				}
+        		}
 			}
 		});
 
@@ -361,6 +438,41 @@ public class SwipeCardNoDB extends JFrame {
 		// textT1_1.setText(WorkshopNo);// 綁定車間
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+
+	public Object[] getLineno(String selectWorkshopNo) {// TODO
+		String linenoList;
+		Object[] a = null;
+		Object[] s = null;
+		ArrayList<Object> list = new ArrayList<Object>();
+		System.out.println(selectWorkshopNo);
+		if (!(selectWorkshopNo == null || selectWorkshopNo.equals("") || selectWorkshopNo.equals("--請選擇車間--"))) {
+			if (!(LineNoObject == null || LineNoObject.equals(""))) {
+				linenoList = LineNoObject.getString(selectWorkshopNo);
+				System.out.println(linenoList);
+				if (!(linenoList == null || linenoList.equals(""))) {
+					s = linenoList.split(",");
+					int con = s.length;
+					for (int i = 0; i < con; i++) {
+						String str;
+						str = s[i].toString().trim();
+						if (!(str == null || str.equals("") || str.equals("null"))) {
+							list.add(str);
+						}
+					}
+					int lcon = list.size();
+					System.out.println(lcon);
+					if (lcon > 0) {
+						a = new Object[lcon];
+						for (int i = 0; i < lcon; i++) {
+							a[i] = list.get(i);
+							System.out.println(list.get(i).toString());
+						}
+					}
+				}
+			}
+		}
+		return a;
 	}
 
 	private static void InitGlobalFont(Font font) {

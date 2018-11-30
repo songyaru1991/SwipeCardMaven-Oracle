@@ -50,7 +50,7 @@ public class JsonFileUtil {
 		} catch (Exception e) {
 			flag = false;
 			logger.error("createJsonFile時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		}
 		return flag;
@@ -92,17 +92,17 @@ public class JsonFileUtil {
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			logger.error("getWorkshopNoByJson時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error("getWorkshopNoByJson時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			logger.error("getWorkshopNoByJson時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		} finally {
 			if (brRread != null) {
@@ -141,17 +141,17 @@ public class JsonFileUtil {
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			logger.error("getSwipeCardRecordByJson時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error("getSwipeCardRecordByJson時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			logger.error("getSwipeCardRecordByJson時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		} finally {
 			if (brRread != null) {
@@ -159,7 +159,7 @@ public class JsonFileUtil {
 					brRread.close();
 				} catch (IOException e) {
 					logger.error("getSwipeCardRecordByJson時 Error，原因:"+e);
-					SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+					//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 					e.printStackTrace();
 				}
 			}
@@ -191,7 +191,7 @@ public class JsonFileUtil {
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			logger.error("修改回写过得刷卡记录log文件名称异常，原因:" + e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		}
 		return flag;
@@ -222,7 +222,7 @@ public class JsonFileUtil {
 		} catch (Exception e) {
 			flag = false;
 			logger.error("saveSelectWorkshopNo時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		}
 		return flag;
@@ -257,17 +257,17 @@ public class JsonFileUtil {
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			logger.error("saveSelectWorkshopNo時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error("saveSelectWorkshopNo時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			logger.error("saveSelectWorkshopNo時 Error，原因:"+e);
-			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			e.printStackTrace();
 		} finally {
 			if (brRread != null) {
@@ -276,11 +276,121 @@ public class JsonFileUtil {
 				} catch (IOException e) {
 					e.printStackTrace();
 					logger.error("saveSelectWorkshopNo時 Error building SqlSession，原因:"+e);
-					SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+					//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 				}
 			}
 		}
 		return selectWorkshopNo;
+	}
+	
+	public String getSaveLineNo() {
+		String filePath = "D:/swipeCard/logs/";
+		String fileName = "saveLineNo.json";
+		String saveLineNoPath = filePath + fileName;
+		File file = new File(saveLineNoPath);
+
+		BufferedReader brRread = null;
+		String selectLineNo = "";
+		try {
+			//如果文件不存在
+			if (!file.exists()) {
+				selectLineNo=null;
+			} else {
+				InputStreamReader streamReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
+				 brRread = new BufferedReader(streamReader);
+			//	brRread = new BufferedReader(new FileReader(workshopNoSavePath));
+				String tempString = null;
+				while ((tempString = brRread.readLine()) != null) {
+					selectLineNo += tempString;
+				}
+				JSONObject workshopNoJson  = new JSONObject(selectLineNo);						
+	
+				selectLineNo = workshopNoJson.get("lineNo").toString();
+
+				brRread.close();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error("getSaveLineNo時 Error building SqlSession，原因:"+e);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.error("getSaveLineNo時 Error building SqlSession，原因:"+e);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			e.printStackTrace();
+		} finally {
+			if (brRread != null) {
+				try {
+					brRread.close();
+				} catch (IOException e) {
+					logger.error("getSaveLineNo時 Error building SqlSession，原因:"+e);
+					// e.printStackTrace();
+					//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+					e.printStackTrace();
+				}
+			}
+		}
+		return selectLineNo;
+	}
+	
+	public void deleteSaveLineNo(String lfileName) {
+		// TODO Auto-generated method stub
+		String filePath = "D:/swipeCard/logs/";
+		String LineNoSavePath = filePath + lfileName;
+		File file = new File(LineNoSavePath);
+		if(file.exists()){
+			file.delete();
+		}
+	}
+	
+	public JSONObject getLineNoByJson() {
+		String filePath = "D:/swipeCard/logs/";
+		String fileName = "LineNo.json";
+		String LineNoSavePath = filePath + fileName;
+		File file = new File(LineNoSavePath);
+		JSONObject a = new JSONObject();
+		BufferedReader brRread = null;
+		String lineNoStr = "";
+		try {
+			if (!file.exists()) {
+				a = null;
+			} else {
+				InputStreamReader streamReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
+				 brRread = new BufferedReader(streamReader);
+			//	brRread = new BufferedReader(new FileReader(workshopNoSavePath));
+				String tempString = null;
+				while ((tempString = brRread.readLine()) != null) {
+					lineNoStr += tempString;
+				}
+				a = new JSONObject(lineNoStr);
+				brRread.close();
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			logger.error("getLineNoByJson時 Error building SqlSession，原因:"+e);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error("getLineNoByJson時 Error building SqlSession，原因:"+e);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.error("getLineNoByJson時 Error building SqlSession，原因:"+e);
+			//SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			e.printStackTrace();
+		} finally {
+			if (brRread != null) {
+				try {
+					brRread.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return a;
 	}
 	
 

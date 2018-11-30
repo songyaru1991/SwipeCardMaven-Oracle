@@ -1,10 +1,15 @@
 package com.swipecard.services;
 
 import java.awt.Color;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -153,8 +158,9 @@ public class SwipeCardService {
 			else
 				workedOneWeek.setWorkedOneWeek(true);
 		} catch (Exception ex) {
-			SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
-			ex.printStackTrace();
+			/*SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
+			ex.printStackTrace();*/
+			workedOneWeek.setWorkedOneWeek(false);
 		}
 		return workedOneWeek;
 	}
@@ -186,17 +192,19 @@ public class SwipeCardService {
 			if(Id==null){
 				Id="";
 			}
-			GetLocalHostIpAndName hostIP=new GetLocalHostIpAndName();
-			String swipeCardHostIp=hostIP.getLocalHostIP();
-			
-			RawRecord swipeRecord=new RawRecord();
-			swipeRecord.setCardID(CardID);
-			swipeRecord.setId(Id);
-			swipeRecord.setSwipeCardTime(SwipeCardTime);
-			swipeRecord.setRecord_Status(Record_Status);
-			swipeRecord.setSwipeCardHostIp(swipeCardHostIp);
-			session.insert("addRawSwipeRecord", swipeRecord);
-			session.commit();
+			synchronized (this) {	
+				GetLocalHostIpAndName hostIP=new GetLocalHostIpAndName();
+				String swipeCardHostIp=hostIP.getLocalIp();
+				
+				RawRecord swipeRecord=new RawRecord();
+				swipeRecord.setCardID(CardID);
+				swipeRecord.setId(Id);
+				swipeRecord.setSwipeCardTime(SwipeCardTime);
+				swipeRecord.setRecord_Status(Record_Status);
+				swipeRecord.setSwipeCardHostIp(swipeCardHostIp);
+				session.insert("addRawSwipeRecord", swipeRecord);
+				session.commit();
+			}
 		}
 		catch(Exception ex) {
 			SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
@@ -304,7 +312,7 @@ public class SwipeCardService {
 	}
 	
 	/*原outWorkNSwipeCard*/
-	public SwingBase offDutyNightShiftSwipeCard(SqlSession session,String RCNO,String PrimaryItemNo,String workShop,Employee employee, Date swipeCardTime, EmpShiftInfos empYesShift) {
+	public SwingBase offDutyNightShiftSwipeCard(SqlSession session,String RCNO,String PrimaryItemNo,String workShop,Employee employee, Date swipeCardTime, EmpShiftInfos empYesShift, String PROD_LINE_CODE) {
 		SwipeCardTimeInfos userNSwipe = new SwipeCardTimeInfos();
 		Date SwipeCardTime2 = swipeCardTime;
 		SwingBase fieldSetting=new SwingBase();
@@ -317,6 +325,7 @@ public class SwipeCardService {
 			userNSwipe.setShift(empYesShift.getShift());
 			userNSwipe.setCLASS_NO(empYesShift.getClass_no());
 			userNSwipe.setWorkshopNo(workShop);
+			userNSwipe.setProdLineCode(PROD_LINE_CODE);
 			
 			int yesterdatOnDutyCardCount=session.selectOne("selectCountNByCardID",userNSwipe);
 			
@@ -361,6 +370,10 @@ public class SwipeCardService {
 								+ FormatDateUtil.changeTimeToStr(swipeCardTime) + "\n"
 								+"\n昨日班別為:"+empYesShift.getClass_desc()
 								+ "\n員工下班刷卡成功！\n------------\n");
+							synchronized (this) {
+								session.insert("insertOutWorkSwipeTime", userNSwipe);
+							}
+							session.commit();
 						}
 						else {
 							fieldSetting.setFieldColor(Color.RED);
@@ -444,7 +457,7 @@ public class SwipeCardService {
 	}
 
 	/*原goWorkSwipeCard*/
-	public SwingBase onDutyDaySwipeCard(SqlSession session, Employee employee, Date swipeCardTime,EmpShiftInfos empCurShift,String RCNO,String PrimaryItemNo,String workShopNo) {
+	public SwingBase onDutyDaySwipeCard(SqlSession session, Employee employee, Date swipeCardTime,EmpShiftInfos empCurShift,String RCNO,String PrimaryItemNo,String workShopNo, String PROD_LINE_CODE) {
 		SwingBase fieldSetting=new SwingBase();
 		try {
 			String curDate=FormatDateUtil.getCurDate();
@@ -472,18 +485,20 @@ public class SwipeCardService {
 				fieldSetting.setFieldContent("上班刷卡\n" + "ID: " + employee.getId() + "\nName: " + employee.getName() + "\n班別： " 
 				+ empCurShift.getClass_desc()
 						+ "\n刷卡時間： " + swipeCardTimeStr + "\n" + "員工上班刷卡成功！\n------------\n");
-				
-				SwipeCardTimeInfos userSwipe = new SwipeCardTimeInfos();
-				userSwipe.setEMP_ID(employee.getId());
-				userSwipe.setSWIPE_DATE(curDate);
-				userSwipe.setSwipeCardTime(swipeCardTime);
-				userSwipe.setRC_NO(RCNO);
-				userSwipe.setPRIMARY_ITEM_NO(PrimaryItemNo);
-				userSwipe.setWorkshopNo(workShopNo);
-				userSwipe.setShift(empCurShift.getShift());
-				userSwipe.setCLASS_NO(empCurShift.getClass_no());
-				session.insert("insertUserByOnDNShift", userSwipe);
-				session.commit();
+				synchronized (this) {	
+					SwipeCardTimeInfos userSwipe = new SwipeCardTimeInfos();
+					userSwipe.setEMP_ID(employee.getId());
+					userSwipe.setSWIPE_DATE(curDate);
+					userSwipe.setSwipeCardTime(swipeCardTime);
+					userSwipe.setRC_NO(RCNO);
+					userSwipe.setPRIMARY_ITEM_NO(PrimaryItemNo);
+					userSwipe.setWorkshopNo(workShopNo);
+					userSwipe.setShift(empCurShift.getShift());
+					userSwipe.setCLASS_NO(empCurShift.getClass_no());
+					userSwipe.setProdLineCode(PROD_LINE_CODE);
+					session.insert("insertUserByOnDNShift", userSwipe);
+					session.commit();
+				}
 			}
 		}
 		catch(Exception ex) {
@@ -495,7 +510,7 @@ public class SwipeCardService {
 
 	/*goOrOutWorkSwipeRecord*/
 	public SwingBase onDutyOrOffDutySwipeRecord(SqlSession session, Employee employee, Date swipeCardTime,
-			EmpShiftInfos empCurShift,String workShopNo,String RCNO,String PrimaryItemNo) {
+			EmpShiftInfos empCurShift,String workShopNo,String RCNO,String PrimaryItemNo,String PROD_LINE_CODE) {
 		SwipeCardTimeInfos userSwipe = new SwipeCardTimeInfos();	
 		SwingBase fieldSetting=new SwingBase();
 		try {
@@ -509,7 +524,7 @@ public class SwipeCardService {
 			// 無刷卡記錄
 			if (curOnDutyCardCount == 0) {
 					
-				fieldSetting=onDutyDaySwipeCard(session, employee, swipeCardTime, empCurShift,RCNO,PrimaryItemNo,workShopNo);
+				fieldSetting=onDutyDaySwipeCard(session, employee, swipeCardTime, empCurShift,RCNO,PrimaryItemNo,workShopNo,PROD_LINE_CODE);
 
 			} else if (curOnDutyCardCount > 0) {
 
@@ -530,7 +545,7 @@ public class SwipeCardService {
 		return fieldSetting;
 	}
 	
-	public SwingBase swipeCardRecord(SqlSession session, Employee employee, Date swipeCardTime,String RCNO,String PrimaryItemNo,String workShopNo) {
+	public SwingBase swipeCardRecord(SqlSession session, Employee employee, Date swipeCardTime,String RCNO,String PrimaryItemNo,String workShopNo,String PROD_LINE_CODE) {
 		SwingBase fieldSetting=new SwingBase(); 
 		EmpShiftInfos curShiftUser = new EmpShiftInfos();
 		try {
@@ -568,6 +583,7 @@ public class SwipeCardService {
 				userSwipe.setWorkshopNo(workShopNo);
 				userSwipe.setRC_NO(RCNO);
 				userSwipe.setPRIMARY_ITEM_NO(PrimaryItemNo);
+				userSwipe.setProdLineCode(PROD_LINE_CODE);
 				
 				if(goWorkSwipeTime.after(oneHBeforClassStart) && goWorkSwipeTime.before(empCurShift.getClass_start())) {
 					int isOnDutySwipeDuplicate =  session.selectOne("isGoWorkSwipeDuplicate", userSwipe);
@@ -575,7 +591,7 @@ public class SwipeCardService {
 						fieldSetting=this.onDutySwipeDuplicate(session, employee, SwipeCardTime2, empCurShift.getShift());
 					}
 					else {
-						fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo);
+						fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo,PROD_LINE_CODE);
 					}
 				}
 				else {
@@ -593,11 +609,13 @@ public class SwipeCardService {
 									else {
 										int outWorkCardCount =  session.selectOne("selectOutWorkByCardID", userSwipe);
 										if(outWorkCardCount==0) {
-											fieldSetting.setFieldColor(Color.WHITE);
-											fieldSetting.setFieldContent("下班刷卡\n" + "ID: " + employee.getId() + "\nName: " + employee.getName()
-											+ "\n刷卡時間： " + FormatDateUtil.changeTimeToStr(swipeCardTime) + "\n今日班別為："+empCurShift.getClass_desc()+ "\n" + "員工下班刷卡成功！\n------------\n");
-											session.insert("insertOutWorkSwipeTime",userSwipe);
-											session.commit();
+											synchronized (this) {	
+												fieldSetting.setFieldColor(Color.WHITE);
+												fieldSetting.setFieldContent("下班刷卡\n" + "ID: " + employee.getId() + "\nName: " + employee.getName()
+												+ "\n刷卡時間： " + FormatDateUtil.changeTimeToStr(swipeCardTime) + "\n今日班別為："+empCurShift.getClass_desc()+ "\n" + "員工下班刷卡成功！\n------------\n");
+												session.insert("insertOutWorkSwipeTime",userSwipe);
+												session.commit();
+											}
 										}
 										else {
 											fieldSetting.setFieldColor(Color.RED);
@@ -619,14 +637,14 @@ public class SwipeCardService {
 								}
 							}
 							else {
-								fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo);
+								fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo,PROD_LINE_CODE);
 							}
 						/*	
 						 *break;
 						case "N":*/
 					} else if (empCurShift.getShift().equals("N")){
 							if(goWorkSwipeTime.getHours() > 12) {
-								fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo);
+								fieldSetting=this.onDutyOrOffDutySwipeRecord(session, employee, SwipeCardTime2, empCurShift, workShopNo, RCNO, PrimaryItemNo,PROD_LINE_CODE);
 							}
 							else if(goWorkSwipeTime.getHours()<=12) {
 								fieldSetting.setFieldColor(Color.RED);
@@ -654,6 +672,34 @@ public class SwipeCardService {
 			logger.error("swipeCardRecord exception",ex);
 		}
 		return fieldSetting;
+	}
+	
+	public String getLocalIp() {
+		// TODO Auto-generated method stub
+				Enumeration allNetInterfaces = null;
+				try {
+					allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+				} catch (SocketException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				InetAddress ip = null;
+				String ipv4 = "";
+				while (allNetInterfaces.hasMoreElements()) {
+					NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+//					System.out.println(netInterface.getName());
+					Enumeration addresses = netInterface.getInetAddresses();
+					while (addresses.hasMoreElements()) {
+						ip = (InetAddress) addresses.nextElement();
+						if (ip != null && ip instanceof Inet4Address) {
+							if(ip.getHostAddress().equals("127.0.0.1")){  
+		                        continue;  
+		                    }
+							ipv4 += ip.getHostAddress()+"/";
+						}
+					}
+				}
+				return ipv4;
 	}
 
 }

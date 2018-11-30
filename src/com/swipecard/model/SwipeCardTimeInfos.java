@@ -87,6 +87,13 @@ public class SwipeCardTimeInfos {
 	public void setSWIPE_DATE(String sWIPE_DATE) {
 		SWIPE_DATE = sWIPE_DATE;
 	}
+	@Override
+	public String toString() {
+		return "SwipeCardTimeInfos [EMP_ID=" + EMP_ID + ", SWIPE_DATE=" + SWIPE_DATE + ", SwipeCardTime="
+				+ SwipeCardTime + ", SwipeCardTime2=" + SwipeCardTime2 + ", CheckState=" + CheckState
+				+ ", ProdLineCode=" + ProdLineCode + ", WorkshopNo=" + WorkshopNo + ", PRIMARY_ITEM_NO="
+				+ PRIMARY_ITEM_NO + ", RC_NO=" + RC_NO + ", Shift=" + Shift + ", CLASS_NO=" + CLASS_NO + "]";
+	}
 	
-
+	
 }

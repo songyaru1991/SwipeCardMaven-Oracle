@@ -1,5 +1,6 @@
 package com.swipecard;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.Date;
@@ -11,6 +12,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.JOptionPane;
 
@@ -22,6 +24,8 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.log4j.Logger;
 
+import com.swipecard.util.DESUtils;
+
 public class CheckCurrentVersion implements Runnable {
 	private static Logger logger = Logger.getLogger(CheckCurrentVersion.class);
 	private boolean active;
@@ -29,14 +33,21 @@ public class CheckCurrentVersion implements Runnable {
 	private static Reader reader;
 	private String localSwipeCardVersion;
 	private Timestamp CurrentDBTimeStamp;
+	
+	static Properties pps = new Properties();
+	static Reader pr = null;
 	static {
 		try {
+			pr = Resources.getResourceAsReader("db.properties");
+			pps.load(pr);
+			pps.setProperty("username", DESUtils.getDecryptString(pps.getProperty("username")));
+			pps.setProperty("password", DESUtils.getDecryptString(pps.getProperty("password")));
 			reader = Resources.getResourceAsReader("Configuration.xml");
 			/*
 			 * String filePath = System.getProperty("user.dir") +
 			 * "/Configuration.xml"; FileReader reader=new FileReader(filePath);
 			 */
-			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader,pps);
 		} catch (Exception e) {
 			logger.error("版本檢查時 Error building SqlSession，原因:"+e);
 			e.printStackTrace();
@@ -70,8 +81,9 @@ public class CheckCurrentVersion implements Runnable {
 				IsLatest = false;
 		} catch (Exception ex) {
 			logger.error("版本檢查時 Error building SqlSession，原因:"+ex);
-			SwipeCardNoDB d = new SwipeCardNoDB(null);
-			throw ExceptionFactory.wrapException("Cause: " + ex, ex);
+			/*SwipeCardNoDB d = new SwipeCardNoDB(null);
+			throw ExceptionFactory.wrapException("Cause: " + ex, ex);*/
+			return true;
 		} finally {
 			ErrorContext.instance().reset();
 			if (session != null) {
@@ -96,10 +108,20 @@ public class CheckCurrentVersion implements Runnable {
 				} else {
 					if ((currentHour >= 9 && currentHour < 12) || (currentHour >= 14 && currentHour < 17)
 							|| (currentHour >= 21 && currentHour < 24) || (currentHour >= 1 && currentHour < 7)) {
-						int dialogResult = JOptionPane.showConfirmDialog(null,
-								"本地端程序為舊版本，點選「確認」後立即自動關閉\n關閉後請重新開啟刷卡端程式，程序會自動更新並重新啟動\n", "程序版本警告",
-								JOptionPane.DEFAULT_OPTION);
-						System.exit(0);
+						AutoUpdate autoUpdate = new AutoUpdate();
+						autoUpdate.update();
+						try {
+							Process exec = Runtime.getRuntime().exec("java -jar D:/swipeCard/update.jar");
+							System.exit(0);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							int dialogResult = JOptionPane.showConfirmDialog(null,
+									"開啟更新程序失敗，请重新打开程序或者联系管理员", "開啟更新程序失敗",
+									JOptionPane.DEFAULT_OPTION);
+							System.exit(0);
+						}
+						
 					}
 
 				}

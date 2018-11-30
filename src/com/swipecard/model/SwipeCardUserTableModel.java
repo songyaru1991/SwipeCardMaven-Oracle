@@ -4,6 +4,7 @@ import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -17,6 +18,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.log4j.Logger;
 
+import com.swipecard.util.DESUtils;
 import com.swipecard.util.FormatDateUtil;
 
 public class SwipeCardUserTableModel extends AbstractTableModel {
@@ -26,14 +28,20 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 	// private Vector TableTitle;// 表格的 列标题
 	private static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
+	static Properties pps = new Properties();
+	static Reader pr = null;
 	static {
 		try {
+			pr = Resources.getResourceAsReader("db.properties");
+			pps.load(pr);
+			pps.setProperty("username", DESUtils.getDecryptString(pps.getProperty("username")));
+			pps.setProperty("password", DESUtils.getDecryptString(pps.getProperty("password")));
 			reader = Resources.getResourceAsReader("Configuration.xml");
 			/*
 			 * String filePath = System.getProperty("user.dir") +
 			 * "/Configuration.xml"; FileReader reader=new FileReader(filePath);
 			 */
-			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader,pps);
 		} catch (Exception e) {
 			logger.error("綁定指示單號時Error building SqlSession，原因:"+e);
 			e.printStackTrace();
@@ -71,33 +79,42 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 			empId=swipeInfos.get(i).getEMP_ID();
 			Employee empInfo = session.selectOne(
 					"selectUserByEmpId", empId);
-			Name = empInfo.getName();		
-			if(Name==null){
-				Name="";
-			}
-			rcno = swipeInfos.get(i).getRC_NO();
-			if(rcno==null){
-				rcno="";
-			}			
+			if(empInfo!=null){
+				if(empInfo.getName()==null){
+					Name="";
+				}else{
+					Name = empInfo.getName();
+				}
+				
+				if(swipeInfos.get(i).getRC_NO()==null){
+					rcno="";
+				}else{
+					rcno = swipeInfos.get(i).getRC_NO();
+				}	
 			Date goWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime();
 			Date outWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime2();
 			SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			if(goWorkSwipeTime!=null && !goWorkSwipeTime.equals("")){				
 				sTime1 = dateFormatter.format(goWorkSwipeTime);
+			}else{
+				sTime1 = "";
 			}
 			if(outWorkSwipeTime!=null && !outWorkSwipeTime.equals("")){	
 				sTime2 = dateFormatter.format(outWorkSwipeTime);
+			}else{
+				sTime2 = "";
 			}
 
 			Object[] tableSwipeInfos = { State, j,empId, Name, sTime1, sTime2, rcno };
 			j++;
 			TableData.add(tableSwipeInfos);
+			}
 		}
 	
 	}
 
 	// public MyNewTableModel(String lineno,String Shift){
-	public SwipeCardUserTableModel(String WorkshopNo,String Shift){		
+	public SwipeCardUserTableModel(String WorkshopNo,String Shift,String Lineno){		
 		// 先new 一下
 		TableData = new Vector<Object>();
 		SqlSession session = sqlSessionFactory.openSession();
@@ -106,11 +123,16 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 		SwipeCardTimeInfos swipeUser = new SwipeCardTimeInfos();
 		swipeUser.setSwipeCardTime(time);
 		swipeUser.setWorkshopNo(WorkshopNo);
+		if(Lineno == null || Lineno.equals("")){
+			Lineno = "0";
+		}
+		System.out.println(Lineno);
+		swipeUser.setProdLineCode(Lineno);
 		List<SwipeCardTimeInfos> swipeInfos = null;
 		try{
 		if(Shift=="D"){
 			swipeInfos = session.selectList(
-					"selectUserByLineNoAndWorkshopNo_DShift", WorkshopNo);
+					"selectUserByLineNoAndWorkshopNo_DShift", swipeUser);
 		}else if(Shift=="N"){
 			swipeInfos = session.selectList(
 					"selectUserByLineNoAndWorkshopNo_NShift", swipeUser);
@@ -126,26 +148,35 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 			empId=swipeInfos.get(i).getEMP_ID();
 			Employee empInfo = session.selectOne(
 						"selectUserByEmpId", empId);			
-			Name = empInfo.getName();
-			if(Name==null){
+			if(empInfo!=null){
+			if(empInfo.getName()==null){
 				Name="";
+			}else{
+				Name = empInfo.getName();
 			}
-			rcno = swipeInfos.get(i).getRC_NO();
-			if(rcno==null){
+			
+			if(swipeInfos.get(i).getRC_NO()==null){
 				rcno="";
-			}				
+			}else{
+				rcno = swipeInfos.get(i).getRC_NO();
+			}
 			Date goWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime();
 			Date outWorkSwipeTime=swipeInfos.get(i).getSwipeCardTime2();
 			SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			if(goWorkSwipeTime!=null && !goWorkSwipeTime.equals("")){				
 				sTime1 = dateFormatter.format(goWorkSwipeTime);
+			}else{
+				sTime1 = "";
 			}
 			if(outWorkSwipeTime!=null && !outWorkSwipeTime.equals("")){	
 				sTime2 = dateFormatter.format(outWorkSwipeTime);
+			}else{
+				sTime2 = "";
 			}
 			Object[] tableSwipeInfos = {State,j,empId,Name,sTime1,sTime2,rcno};
 			j++;
 			TableData.add(tableSwipeInfos);
+		}
 		}
 	}
 		finally {
@@ -215,7 +246,7 @@ public class SwipeCardUserTableModel extends AbstractTableModel {
 
 	public static void main(String[] args) {
 		JFrame frm = new JFrame();
-		SwipeCardUserTableModel myModel = new SwipeCardUserTableModel("3L-37", "D");
+		SwipeCardUserTableModel myModel = new SwipeCardUserTableModel("3L-37", "D" ,"123");
 
 		JTable mytable = new JTable(myModel);
 		mytable.setRowHeight(50);
