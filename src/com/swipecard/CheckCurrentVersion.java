@@ -69,9 +69,10 @@ public class CheckCurrentVersion implements Runnable {
 			else
 				IsLatest = false;
 		} catch (Exception ex) {
-			logger.error("版本檢查時 Error building SqlSession，原因:"+ex);
-			SwipeCardNoDB d = new SwipeCardNoDB(null);
-			throw ExceptionFactory.wrapException("Cause: " + ex, ex);
+			logger.error("版本檢查時Exception，原因:"+ex);
+			/*SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
+			throw ExceptionFactory.wrapException("Exception, Cause: " + ex, ex);*/
+			return true;
 		} finally {
 			ErrorContext.instance().reset();
 			if (session != null) {

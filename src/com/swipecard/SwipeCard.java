@@ -54,6 +54,7 @@ import org.apache.log4j.Logger;
 
 import com.swipecard.util.FormatDateUtil;
 import com.swipecard.util.FrameShowUtil;
+import com.swipecard.util.GetLocalHostIpAndName;
 import com.swipecard.util.JsonFileUtil;
 import com.swipecard.util.SwipeCardJButton;
 import com.swipecard.model.EmpShiftInfos;
@@ -450,8 +451,8 @@ public class SwipeCard extends JFrame {
 				String RC_NO = jtf.getText();
 				String PRIMARY_ITEM_NO = textT2_1.getText();
 				String Name = "", empID = "";
+				SqlSession session = sqlSessionFactory.openSession();
 				try {
-					SqlSession session = sqlSessionFactory.openSession();
 					StringBuilder strBuilder = new StringBuilder();
 					for (int i = 0; i < RC_NO.length(); i++) {
 						char charAt = RC_NO.charAt(i);
@@ -517,6 +518,9 @@ public class SwipeCard extends JFrame {
 					throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e1, e1);
 				} finally {
 					ErrorContext.instance().reset();
+					if (session != null) {
+						session.close();
+					}
 				}
 			}
 		});
@@ -573,7 +577,7 @@ public class SwipeCard extends JFrame {
 							Employee eif = (Employee) session.selectOne("selectUserByCardID", CardID);
 							//只要刷卡都將記錄至raw_record table
 							String Record_Status=null;
-							swipeCardService.addRawSwipeRecord(session, eif, CardID, swipeCardTime, WorkshopNo,Record_Status);
+							addRawSwipeRecord(session, eif, CardID, swipeCardTime, WorkshopNo,Record_Status);
 							RawRecord swipeRecord = new RawRecord();
 							swipeRecord.setCardID(CardID);
 							swipeRecord.setSwipeCardTime(swipeCardTime);
@@ -779,6 +783,37 @@ public class SwipeCard extends JFrame {
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
+		
+	/*當員工刷卡時，立即記錄一筆刷卡資料至raw_record table中*/
+	public void addRawSwipeRecord(SqlSession session, Employee eif, String CardID,Date SwipeCardTime,String WorkshopNo,String Record_Status) {
+		String Id=null;
+		try {
+			if(eif!=null)
+				Id=eif.getId();
+			if(Id==null){
+				Id="";
+			}
+			synchronized (this) {	
+				GetLocalHostIpAndName hostIP=new GetLocalHostIpAndName();
+				String swipeCardHostIp=hostIP.getLocalHostIP();
+			
+				RawRecord swipeRecord=new RawRecord();
+				swipeRecord.setCardID(CardID);
+				swipeRecord.setId(Id);
+				swipeRecord.setSwipeCardTime(SwipeCardTime);
+				swipeRecord.setRecord_Status(Record_Status);
+				swipeRecord.setSwipeCardHostIp(swipeCardHostIp);
+				session.insert("addRawSwipeRecord", swipeRecord);
+				session.commit();
+			}
+		}
+		catch(Exception ex) {
+			logger.error("寫入原始刷卡記錄異常"+ex);
+			dispose();
+			SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
+			ex.printStackTrace();
+		}
+	}
 	
 	private void showLabelContent(SwingBase fieldSetting) {
 		jtextT1_1.append(fieldSetting.getFieldContent());
@@ -875,9 +910,9 @@ public class SwipeCard extends JFrame {
 			final Object[] s = a;
 			return a;
 		} catch (Exception e1) {
-			System.out.println("Error opening session");
+			logger.error("回傳生產指示單號異常"+e1);
 			dispose();
-			SwipeCardNoDB d = new SwipeCardNoDB(null);
+			SwipeCardNoDB d = new SwipeCardNoDB(defaultWorkshopNo);
 			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e1, e1);
 		} finally {
 			ErrorContext.instance().reset();

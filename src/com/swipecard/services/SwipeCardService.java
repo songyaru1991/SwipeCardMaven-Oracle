@@ -153,8 +153,10 @@ public class SwipeCardService {
 			else
 				workedOneWeek.setWorkedOneWeek(true);
 		} catch (Exception ex) {
-			SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
-			ex.printStackTrace();
+			/*SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
+			ex.printStackTrace();*/
+			logger.error(cardID+"刷卡，七休一異常：" + ex);
+			workedOneWeek.setWorkedOneWeek(false);
 		}
 		return workedOneWeek;
 	}
@@ -201,7 +203,7 @@ public class SwipeCardService {
 			}
 		}
 		catch(Exception ex) {
-			SwipeCardNoDB d = new SwipeCardNoDB(WorkshopNo);
+			logger.error("寫入原始刷卡記錄異常"+ex);
 			ex.printStackTrace();
 		}
 	}

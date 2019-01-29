@@ -228,8 +228,8 @@ public class SwipeCardLogin extends JFrame {
 	public Object[] getWorkshopNo() {// TODO
 		List<LineNO> workshopNoInfo;
 		Object[] a = null;
+		SqlSession session = sqlSessionFactory.openSession();
 		try {
-			SqlSession session = sqlSessionFactory.openSession();
 			JSONArray workshopNoArray = new JSONArray();
 			workshopNoInfo = session.selectList("selectWorkshopNo");
 			int con = workshopNoInfo.size();
@@ -255,6 +255,9 @@ public class SwipeCardLogin extends JFrame {
 			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
 		} finally {
 			ErrorContext.instance().reset();
+			if (session != null) {
+				session.close();
+			}
 		}
 		return a;
 	}
@@ -264,8 +267,8 @@ public class SwipeCardLogin extends JFrame {
 		// TODO
 		List<Employee> user;
 		Object[] a = null;
+		SqlSession session = sqlSessionFactory.openSession();
 		try {
-			SqlSession session = sqlSessionFactory.openSession();
 			user = session.selectList("selectUserByPermission");
 			if (user.size() > 0) {
 				a = new Object[user.size()];
@@ -284,6 +287,9 @@ public class SwipeCardLogin extends JFrame {
 			throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
 		} finally {
 			ErrorContext.instance().reset();
+			if (session != null) {
+				session.close();
+			}
 		}
 		return a;
 	}
